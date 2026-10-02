@@ -129,8 +129,10 @@ public interface TabletRepository extends JpaRepository<Tablet, Long> {
                                   OR
                                   (
                                       :estado = 'OFFLINE'
+                                      AND(
                                        COALESCE(d.sin_respuesta, FALSE) = TRUE
                                       AND d.last_connection < NOW() - INTERVAL '17 minutes'
+                                    )
                                   )
                                   OR
                                   (
@@ -242,8 +244,10 @@ public interface TabletRepository extends JpaRepository<Tablet, Long> {
                 OR
                 (
                     :estado = 'OFFLINE'
+                    AND(
                      COALESCE(d.sin_respuesta, FALSE) = TRUE
                     AND d.last_connection < NOW() - INTERVAL '17 minutes'
+                )
                 )
                 OR
                 (

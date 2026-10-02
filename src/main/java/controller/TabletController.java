@@ -375,119 +375,48 @@ public class TabletController {
 
                 List<Tablet> tablets = tabletRepository.findAll();
 
-                java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(20);
-
-                List<java.util.concurrent.Future<?>> resultados = new java.util.ArrayList<>();
-
-                java.util.concurrent.atomic.AtomicInteger respondiendo = new java.util.concurrent.atomic.AtomicInteger(
-                                0);
-
-                java.util.concurrent.atomic.AtomicInteger sinRespuesta = new java.util.concurrent.atomic.AtomicInteger(
-                                0);
+                int conectadas = 0;
+                int desconectadas = 0;
 
                 for (Tablet tablet : tablets) {
 
-                        java.util.concurrent.Future<?> future = executor.submit(() -> {
+                        String deviceId = tablet.getId().toString();
 
-                                String deviceId = tablet.getId().toString();
+                        boolean conectada = MdmSocketHandler.estaTabletConectada(deviceId);
 
-                                try {
+                        if (conectada) {
 
-                                        // =========================================
-                                        // 1. VERIFICAR SI EXISTE WEBSOCKET
-                                        // =========================================
+                                tablet.setSinRespuesta(false);
 
-                                        if (!MdmSocketHandler.estaTabletConectada(deviceId)) {
+                                // Pedimos actualización de la información
+                                MdmSocketHandler.solicitarActualizacion(deviceId);
 
-                                                tablet.setSinRespuesta(true);
-                                                tabletRepository.save(tablet);
+                                conectadas++;
 
-                                                sinRespuesta.incrementAndGet();
+                                System.out.println(
+                                                "REFRESH | ACTIVO=" + tablet.getActivo()
+                                                                + " | CONECTADA");
 
-                                                System.out.println(
-                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
-                                                                                + " | SIN WEBSOCKET");
+                        } else {
 
-                                                return;
-                                        }
+                                tablet.setSinRespuesta(true);
 
-                                        // =========================================
-                                        // 2. SOLICITAR INFORMACIÓN ACTUALIZADA
-                                        // =========================================
+                                desconectadas++;
 
-                                        MdmSocketHandler.solicitarActualizacion(deviceId);
-
-                                        // =========================================
-                                        // 3. COMPROBAR QUE REALMENTE RESPONDA
-                                        // =========================================
-
-                                        boolean responde = MdmSocketHandler.verificarConexion(deviceId);
-
-                                        if (responde) {
-
-                                                tablet.setSinRespuesta(false);
-                                                respondiendo.incrementAndGet();
-
-                                                System.out.println(
-                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
-                                                                                + " | RESPONDE");
-
-                                        } else {
-
-                                                tablet.setSinRespuesta(true);
-                                                sinRespuesta.incrementAndGet();
-
-                                                System.out.println(
-                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
-                                                                                + " | NO RESPONDE");
-                                        }
-
-                                        tabletRepository.save(tablet);
-
-                                } catch (Exception e) {
-
-                                        tablet.setSinRespuesta(true);
-                                        tabletRepository.save(tablet);
-
-                                        sinRespuesta.incrementAndGet();
-
-                                        System.err.println(
-                                                        "REFRESH ERROR | ACTIVO="
-                                                                        + tablet.getActivo()
-                                                                        + " | "
-                                                                        + e.getMessage());
-                                }
-                        });
-
-                        resultados.add(future);
-                }
-
-                // Esperar que todas las verificaciones terminen
-                for (java.util.concurrent.Future<?> resultado : resultados) {
-
-                        try {
-                                resultado.get();
-                        } catch (Exception e) {
-                                System.err.println(
-                                                "ERROR ESPERANDO REFRESH: "
-                                                                + e.getMessage());
+                                System.out.println(
+                                                "REFRESH | ACTIVO=" + tablet.getActivo()
+                                                                + " | DESCONECTADA");
                         }
+
+                        tabletRepository.save(tablet);
                 }
-
-                executor.shutdown();
-
-                System.out.println(
-                                "REFRESH FINALIZADO"
-                                                + " | TOTAL=" + tablets.size()
-                                                + " | RESPONDIENDO=" + respondiendo.get()
-                                                + " | SIN_RESPUESTA=" + sinRespuesta.get());
 
                 return ResponseEntity.ok(
                                 Map.of(
                                                 "success", true,
                                                 "total", tablets.size(),
-                                                "respondiendo", respondiendo.get(),
-                                                "sinRespuesta", sinRespuesta.get()));
+                                                "conectadas", conectadas,
+                                                "desconectadas", desconectadas));
         }
 
         @PostMapping("/sync-credentials")
