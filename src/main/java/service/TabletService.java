@@ -7,6 +7,10 @@ import repository.TareaProgramadaDispositivoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import repository.GpsTrackingRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,11 +78,54 @@ public class TabletService {
             tablet.setUptime(datosRecibidos.getUptime());
             tablet.setTemperatura(datosRecibidos.getTemperatura());
             tablet.setEstado(datosRecibidos.getEstado());
-            tablet.setCodigoEmp(datosRecibidos.getCodigoEmp());
-            tablet.setNombreEmp(datosRecibidos.getNombreEmp());
+            tablet.setEstadoWifi(datosRecibidos.getEstadoWifi());
             tablet.setDeviceName(datosRecibidos.getDeviceName());
             tablet.setAndroidId(datosRecibidos.getAndroidId());
             tablet.setOsVersion(datosRecibidos.getOsVersion());
+            tablet.setAppVersion(datosRecibidos.getAppVersion());
+            tablet.setImei(datosRecibidos.getImei());
+            tablet.setSecurityPatch(datosRecibidos.getSecurityPatch());
+            tablet.setSystemUpdatePending(
+                    Boolean.TRUE.equals(
+                            datosRecibidos.getSystemUpdatePending()));
+
+            tablet.setSystemUpdateReceivedTime(
+                    datosRecibidos.getSystemUpdateReceivedTime());
+
+            // ==========================================
+            // ÚLTIMA UBICACIÓN RECIBIDA EN HEARTBEAT
+            // ==========================================
+
+            if (datosRecibidos.getLatitude() != null
+                    && datosRecibidos.getLongitude() != null) {
+
+                tablet.setLatitude(
+                        datosRecibidos.getLatitude());
+
+                tablet.setLongitude(
+                        datosRecibidos.getLongitude());
+
+                if (datosRecibidos.getGpsAccuracy() != null) {
+                    tablet.setGpsAccuracy(
+                            datosRecibidos.getGpsAccuracy());
+                }
+
+                if (datosRecibidos.getGpsSource() != null) {
+                    tablet.setGpsSource(
+                            datosRecibidos.getGpsSource());
+                }
+
+                if (datosRecibidos.getGpsTimestampMillis() != null) {
+
+                    tablet.setGpsTimestamp(
+                            java.time.Instant
+                                    .ofEpochMilli(
+                                            datosRecibidos.getGpsTimestampMillis())
+                                    .atZone(
+                                            java.time.ZoneId.systemDefault())
+                                    .toLocalDateTime());
+                }
+            }
 
             if (datosRecibidos.getCategoria() != null
                     && !datosRecibidos.getCategoria().isBlank()) {
@@ -126,6 +173,10 @@ public class TabletService {
 
             // Limpiamos el comando en la base de datos para que no se repita
             tablet.setPendingCommand(null);
+
+            // Si recibimos heartbeat, sabemos que la tablet está respondiendo
+            tablet.setSinRespuesta(false);
+
             tablet.setLastConnection(LocalDateTime.now());
 
             // Guardamos
@@ -138,7 +189,14 @@ public class TabletService {
 
         } else {
 
+            datosRecibidos.setSinRespuesta(false);
+
             datosRecibidos.setLastConnection(LocalDateTime.now());
+
+            if (datosRecibidos.getModoKiosco() == null) {
+                datosRecibidos.setModoKiosco(false);
+            }
+
             return tabletRepository.save(datosRecibidos);
 
         }
@@ -149,27 +207,36 @@ public class TabletService {
             String fechaDesde,
             String fechaHasta) {
 
+        if ((fechaDesde == null || fechaDesde.isBlank()) &&
+                (fechaHasta == null || fechaHasta.isBlank())) {
+
+            return tabletRepository.obtenerHistorialCargadorSinFechas(tabletId);
+        }
+
         return tabletRepository.obtenerHistorialCargador(
                 tabletId,
                 fechaDesde,
                 fechaHasta);
-
     }
 
     public Page<TabletDashboardProjection> obtenerDashboard(
             String buscar,
             String planta,
             String categoria,
+            String version,
             String estadoCargador,
             String estado,
+            String estadoBateria,
             Pageable pageable) {
 
         return tabletRepository.obtenerDashboard(
                 buscar,
                 planta,
                 categoria,
+                version,
                 estadoCargador,
                 estado,
+                estadoBateria,
                 pageable);
     }
 
@@ -264,6 +331,9 @@ public class TabletService {
         if (nuevaConfig.getRestricciones() != null) {
             tablet.setRestricciones(nuevaConfig.getRestricciones());
         }
+        if (nuevaConfig.getModoKiosco() != null) {
+            tablet.setModoKiosco(nuevaConfig.getModoKiosco());
+        }
         if (nuevaConfig.getUrlsPermitidas() != null) {
             tablet.setUrlsPermitidas(nuevaConfig.getUrlsPermitidas());
         }
@@ -272,6 +342,54 @@ public class TabletService {
         }
 
         return tabletRepository.save(tablet);
+    }
+
+    // TEMPORAL SIRVE PARA DESACTIVAR BLOQUEO APPS, RESERT Y MODO DESARROYADOR
+    @Transactional
+    public Tablet cambiarRestriccionesInstalacionMasiva(
+            String activo,
+            boolean bloquear) {
+
+        Tablet tablet = tabletRepository.findByActivo(activo)
+                .orElseThrow(() -> new RuntimeException("Tablet no encontrada con activo: " + activo));
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            String restriccionesActuales = tablet.getRestricciones();
+
+            ObjectNode restricciones;
+
+            if (restriccionesActuales == null || restriccionesActuales.isBlank()) {
+                restricciones = mapper.createObjectNode();
+            } else {
+                restricciones = (ObjectNode) mapper.readTree(restriccionesActuales);
+            }
+
+            // ============================================
+            // INSTALACIÓN DE APPS
+            // true = bloquear instalación
+            // false = permitir instalación
+            // ============================================
+            restricciones.put("installApps", bloquear);
+
+            // ============================================
+            // ESTAS DOS SIEMPRE DEBEN QUEDAR DESACTIVADAS
+            // ============================================
+            restricciones.put("developer", false);
+            restricciones.put("factoryReset", false);
+
+            tablet.setRestricciones(
+                    mapper.writeValueAsString(restricciones));
+
+            return tabletRepository.save(tablet);
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Error modificando restricciones del activo " + activo,
+                    e);
+        }
     }
 
     @Transactional
@@ -322,6 +440,9 @@ public class TabletService {
         dto.setBateriaSinDatos(
                 r[13] == null ? 0 : ((Number) r[13]).longValue());
 
+        dto.setBateriasInfladas(
+                r[14] == null ? 0 : ((Number) r[14]).longValue());
+
         dto.setPlantaGeneral(
                 convertirGrafica(
                         tabletRepository.obtenerGraficaPlantas()));
@@ -367,6 +488,7 @@ public class TabletService {
             String categoria,
             String estadoCargador,
             String estado,
+            String estadoBateria,
             String columnas) throws IOException {
 
         List<TabletDashboardProjection> datos = tabletRepository.obtenerDashboardReporte(
@@ -374,7 +496,8 @@ public class TabletService {
                 planta == null ? "" : planta,
                 categoria == null ? "" : categoria,
                 estadoCargador == null ? "" : estadoCargador,
-                estado == null ? "" : estado);
+                estado == null ? "" : estado,
+                estadoBateria == null ? "" : estadoBateria);
 
         Set<String> cols = new HashSet<>();
 
@@ -426,6 +549,11 @@ public class TabletService {
 
         if (cols.contains("bateria"))
             encabezado.createCell(col++).setCellValue("Batería");
+        if (cols.contains("estadoBateria"))
+            encabezado.createCell(col++).setCellValue("Estado batería");
+
+        if (cols.contains("porcentajeInflado"))
+            encabezado.createCell(col++).setCellValue("Porcentaje inflado");
 
         if (cols.contains("temperatura"))
             encabezado.createCell(col++).setCellValue("Temperatura");
@@ -507,6 +635,18 @@ public class TabletService {
                 row.createCell(col++).setCellValue(
                         t.getBatteryLevel() == null ? "" : String.valueOf(t.getBatteryLevel()));
 
+            if (cols.contains("estadoBateria"))
+                row.createCell(col++).setCellValue(
+                        t.getEstadoBateria() == null
+                                ? "NORMAL"
+                                : t.getEstadoBateria());
+
+            if (cols.contains("porcentajeInflado"))
+                row.createCell(col++).setCellValue(
+                        t.getPorcentajeInflado() == null
+                                ? ""
+                                : t.getPorcentajeInflado() + "%");
+
             if (cols.contains("temperatura"))
                 row.createCell(col++).setCellValue(
                         t.getTemperatura() == null ? "" : t.getTemperatura());
@@ -547,6 +687,10 @@ public class TabletService {
         return out.toByteArray();
     }
 
+    public ActivoInfo obtenerActivoInfo(String activo) {
+        return tabletRepository.obtenerActivoInfo(activo);
+    }
+
     public List<String> obtenerPlantas() {
 
         return tabletRepository.obtenerPlantas();
@@ -557,17 +701,79 @@ public class TabletService {
         return tabletRepository.obtenerCategorias();
     }
 
+    public List<String> obtenerDepartamentos() {
+        return tabletRepository.obtenerDepartamentos();
+    }
+
+    public List<String> obtenerVersionesApp() {
+        return tabletRepository.obtenerVersionesApp();
+    }
+
     public List<Tablet> obtenerTablets() {
 
         return tabletRepository.findAll();
     }
 
-    public Page<Tablet> obtenerTabletsSelector(
+    public Page<TabletDashboardProjection> obtenerTabletsSelector(
             String buscar,
+            String planta,
+            String departamento,
+            String categoria,
             Pageable pageable) {
 
         return tabletRepository.obtenerTabletsSelector(
                 buscar == null ? "" : buscar,
+                planta == null ? "" : planta,
+                departamento == null ? "" : departamento,
+                categoria == null ? "" : categoria,
                 pageable);
+    }
+
+    @Transactional
+    public Tablet actualizarEstadoBateria(
+            Long id,
+            String estadoBateria,
+            Integer porcentajeInflado) {
+
+        Tablet tablet = tabletRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tablet no encontrada con ID: " + id));
+
+        if (estadoBateria == null || estadoBateria.isBlank()) {
+            throw new IllegalArgumentException("Estado de batería obligatorio");
+        }
+
+        String estado = estadoBateria.trim().toUpperCase();
+
+        if (!estado.equals("NORMAL") && !estado.equals("INFLADA")) {
+            throw new IllegalArgumentException("Estado de batería no válido");
+        }
+
+        if (estado.equals("NORMAL")) {
+
+            tablet.setEstadoBateria("NORMAL");
+            tablet.setPorcentajeInflado(null);
+
+        } else {
+
+            if (porcentajeInflado == null ||
+                    porcentajeInflado < 1 ||
+                    porcentajeInflado > 100) {
+
+                throw new IllegalArgumentException(
+                        "El porcentaje debe estar entre 1 y 100");
+            }
+
+            tablet.setEstadoBateria("INFLADA");
+            tablet.setPorcentajeInflado(porcentajeInflado);
+        }
+
+        return tabletRepository.save(tablet);
+    }
+
+    public Tablet obtenerPorId(Long id) {
+
+        return tabletRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(
+                        "Tablet no encontrada con ID: " + id));
     }
 }

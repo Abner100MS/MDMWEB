@@ -36,13 +36,11 @@ public interface TabletDashboardProjection {
     @JsonProperty("departamento")
     String getDepartamento();
 
-    /*
-     * @JsonProperty("codigo_emp")
-     * String getCodigoEmp();
-     * 
-     * @JsonProperty("nombre_emp")
-     * String getNombreEmp();
-     */
+    @JsonProperty("estado_bateria")
+    String getEstadoBateria();
+
+    @JsonProperty("porcentaje_inflado")
+    Integer getPorcentajeInflado();
 
     @JsonProperty("battery_level")
     Integer getBatteryLevel();
@@ -73,4 +71,10 @@ public interface TabletDashboardProjection {
 
     @JsonProperty("os_version")
     String getOsVersion();
+
+    @JsonProperty("app_version")
+    String getAppVersion();
+
+    @JsonProperty("en_stock")
+    Boolean getEnStock();
 }

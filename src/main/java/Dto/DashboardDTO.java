@@ -22,6 +22,8 @@ public class DashboardDTO {
 
     private long bateriaSinDatos;
 
+    private long bateriasInfladas;
+
     private long nopowerCel;
     private long nopowerHand;
     private long nopowerTab;

@@ -147,6 +147,7 @@
     <div class="card shadow-sm">
 
         <div class="card-body p-0">
+         <div class="tabla-tareas-scroll">
 
             <table class="table table-hover align-middle mb-0">
 
@@ -193,6 +194,8 @@
                 </tbody>
 
             </table>
+
+         </div>
 
         </div>
 
@@ -286,7 +289,7 @@
                         </label>
 
                         <input type="text" id="txtUrlApk" class="form-control"
-                            value="https://github.com/amoraless14/MonitoreoTablets/releases/download/V1.2/Monitoreo.apk"
+                            value="https://github.com/Abner100MS/MonitoreoTablets/releases/download/V1.6/Monitoreo.apk"
                             placeholder="URL del APK">
 
                         <small class="text-muted">
@@ -539,9 +542,7 @@
                     Seleccionar dispositivos
                 </h5>
 
-                <button
-                    class="btn-close"
-                    data-bs-dismiss="modal">
+                <button class="btn-close" data-bs-dismiss="modal">
                 </button>
 
             </div>
@@ -549,59 +550,93 @@
 
             <div class="modal-body">
 
-                <!-- BUSCADOR -->
-                <div class="row g-2 mb-3">
 
-                    <div class="col-md-9">
+                <!-- FILTROS DEL SELECTOR -->
+                <div class="selector-filtros">
 
-                        <div class="input-group">
+                    <div class="input-group selector-buscador">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
 
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
+                        <input type="text" id="txtBuscarDispositivoTarea" class="form-control" placeholder="Buscar...">
+                    </div>
 
-                            <input
-                                type="text"
-                                id="txtBuscarDispositivoTarea"
-                                class="form-control"
-                                placeholder="Buscar por activo, equipo, modelo o categoría...">
+
+                    <select id="cmbPlantaSelector" class="form-select">
+                        <option value="">Todas las plantas</option>
+                    </select>
+
+
+                    <div class="dropdown selector-dropdown" id="dropdownDepartamento">
+
+                        <button class="form-select text-start" type="button" id="btnDepartamentoSelector"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside">
+
+                            Todos los departamentos
+
+                        </button>
+
+                        <div class="dropdown-menu p-2 selector-dropdown-menu">
+
+                            <input type="text" class="form-control form-control-sm mb-2"
+                                id="txtBuscarDepartamentoSelector" placeholder="Buscar departamento..."
+                                autocomplete="off">
+
+                            <div id="listaDepartamentosSelector" class="selector-lista-opciones">
+                            </div>
 
                         </div>
 
                     </div>
 
 
-                    <div class="col-md-3">
+                    <select id="cmbCategoriaSelector" class="form-select">
+                        <option value="">Todas las categorías</option>
+                    </select>
 
-                        <select
-                            id="cmbRegistrosSelector"
-                            class="form-select">
 
-                            <option value="25" selected>25 registros</option>
-                            <option value="50">50 registros</option>
-                            <option value="100">100 registros</option>
-
-                        </select>
-
-                    </div>
+                    <select id="cmbRegistrosSelector" class="form-select">
+                        <option value="25" selected>25 registros</option>
+                        <option value="50">50 registros</option>
+                        <option value="100">100 registros</option>
+                    </select>
 
                 </div>
 
 
+                <!-- ACCIONES DE SELECCIÓN -->
+                <div class="selector-acciones">
+
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="chkSeleccionarTodosResultados">
+
+                        <label class="form-check-label" for="chkSeleccionarTodosResultados">
+                            Seleccionar todos los resultados
+                        </label>
+                    </div>
+
+                    <div class="selector-total">
+                        <strong id="cantidadResultadosSelector">0</strong>
+                        dispositivos encontrados
+                    </div>
+
+                </div>
+
                 <!-- TABLA -->
-                <div
-                    class="border rounded"
-                    style="height: 50vh; overflow-y: auto;">
+                <div class="border rounded" style="height: 50vh; overflow-y: auto;">
 
                     <table class="table table-hover align-middle mb-0">
 
                         <thead class="table-light sticky-top">
 
                             <tr>
-                                <th style="width:50px"></th>
                                 <th>Activo</th>
                                 <th>Equipo</th>
-                                <th>Modelo</th>
+                                <th>Empleado</th>
+                                <th>Planta</th>
+                                <th>Área</th>
+                                <th>Departamento</th>
                                 <th>Categoría</th>
                             </tr>
 
@@ -616,12 +651,9 @@
 
 
                 <!-- INFORMACIÓN + PAGINACIÓN -->
-                <div
-                    class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
 
-                    <div
-                        id="infoPaginacionSelector"
-                        class="text-muted small">
+                    <div id="infoPaginacionSelector" class="text-muted small">
 
                         Mostrando 0 dispositivos
 
@@ -630,10 +662,7 @@
 
                     <div class="d-flex align-items-center gap-2">
 
-                        <button
-                            type="button"
-                            id="btnAnteriorSelector"
-                            class="btn btn-sm btn-outline-secondary"
+                        <button type="button" id="btnAnteriorSelector" class="btn btn-sm btn-outline-secondary"
                             onclick="cambiarPaginaSelector(-1)">
 
                             <i class="bi bi-chevron-left"></i>
@@ -642,19 +671,14 @@
                         </button>
 
 
-                        <span
-                            id="paginaActualSelector"
-                            class="small fw-semibold">
+                        <span id="paginaActualSelector" class="small fw-semibold">
 
                             Página 1 de 1
 
                         </span>
 
 
-                        <button
-                            type="button"
-                            id="btnSiguienteSelector"
-                            class="btn btn-sm btn-outline-secondary"
+                        <button type="button" id="btnSiguienteSelector" class="btn btn-sm btn-outline-secondary"
                             onclick="cambiarPaginaSelector(1)">
 
                             Siguiente
@@ -682,20 +706,14 @@
                 </div>
 
 
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
 
                     Cancelar
 
                 </button>
 
 
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick="confirmarDispositivos()">
+                <button type="button" class="btn btn-primary" onclick="confirmarDispositivos()">
 
                     Aceptar
 

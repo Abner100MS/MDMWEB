@@ -43,4 +43,11 @@ public interface TareaProgramadaService {
 
     void procesarActualizacionPendiente(Long tabletId);
 
+    List<String> obtenerPlantas();
+
+    List<String> obtenerCategorias();
+
+    List<String> obtenerDepartamentos();
+
+    List<String> obtenerEmpleados();
 }

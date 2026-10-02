@@ -13,4 +13,6 @@ public interface RolAccesoRepository extends JpaRepository<RolAcceso, Long> {
 
     boolean existsByPassword(String password);
 
+    Optional<RolAcceso> findFirstByRolIgnoreCaseAndActivoTrue(String rol);
+
 }

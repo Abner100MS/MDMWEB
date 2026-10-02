@@ -379,20 +379,56 @@ function cambiarDestino() {
         case "PLANTA":
 
             div.innerHTML = `
-    <select id="cmbPlanta" class="form-select"></select>
-    `;
+                <select id="cmbPlanta" class="form-select">
 
-            llenarPlantas();
+                    <option value="">
+                        Seleccione una planta
+                    </option>
+
+                    <option value="PC">
+                        Planta Central
+                    </option>
+
+                    <option value="PF">
+                        Planta Fajas
+                    </option>
+
+                </select>
+            `;
 
             break;
 
         case "CATEGORIA":
 
             div.innerHTML = `
-    <select id="cmbCategoria" class="form-select"></select>
-    `;
+                <select id="cmbCategoria" class="form-select">
 
-            llenarCategorias();
+                    <option value="">
+                        Seleccione una categoría
+                    </option>
+
+                    <option value="GENERAL">
+                        General
+                    </option>
+
+                    <option value="CALIDAD">
+                        Calidad
+                    </option>
+
+                    <option value="CELULAR">
+                        Celular
+                    </option>
+
+                    <option value="HANDHELD">
+                        Handheld
+                    </option>
+
+                    <option value="SIN DATOS">
+                        Sin datos
+                    </option>
+
+                </select>
+            `;
 
             break;
 
@@ -420,56 +456,88 @@ function cambiarDestino() {
 
 }
 
-async function llenarPlantas() {
+function llenarPlantas() {
 
-    const combo = document.getElementById("cmbPlanta");
+    const combo =
+        document.getElementById("cmbPlanta");
 
-    if (plantas.length === 0) {
-
-        const res = await fetch("/devices/plantas");
-
-        plantas = await res.json();
+    if (!combo) {
+        return;
     }
 
-    combo.innerHTML = "";
+    combo.innerHTML = `
+        <option value="">
+            Seleccione una planta
+        </option>
 
-    combo.innerHTML += `<option value="">Seleccione una planta</option>`;
+        <option value="PC">
+            Planta Central
+        </option>
 
-    plantas.forEach(planta => {
-
-        combo.innerHTML += `
-            <option value="${planta}">
-                ${planta}
-            </option>
-        `;
-
-    });
+        <option value="PF">
+            Planta Fajas
+        </option>
+    `;
 }
+
 
 async function llenarCategorias() {
 
-    const combo = document.getElementById("cmbCategoria");
+    const combo =
+        document.getElementById("cmbCategoria");
 
-    if (categorias.length === 0) {
-
-        const res = await fetch("/devices/categorias");
-
-        categorias = await res.json();
+    if (!combo) {
+        return;
     }
 
-    combo.innerHTML = "";
+    combo.innerHTML = `
+        <option value="">
+            Cargando categorías...
+        </option>
+    `;
 
-    combo.innerHTML += `<option value="">Seleccione una categoría</option>`;
+    try {
 
-    categorias.forEach(categoria => {
+        const res =
+            await fetch("/devices/categorias");
 
-        combo.innerHTML += `
-            <option value="${categoria}">
-                ${categoria}
+        if (!res.ok) {
+            throw new Error(
+                "No se pudieron cargar las categorías"
+            );
+        }
+
+        const categorias =
+            await res.json();
+
+        combo.innerHTML = `
+            <option value="">
+                Seleccione una categoría
             </option>
         `;
 
-    });
+        categorias.forEach(categoria => {
+
+            combo.innerHTML += `
+                <option value="${categoria}">
+                    ${categoria}
+                </option>
+            `;
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando categorías:",
+            error
+        );
+
+        combo.innerHTML = `
+            <option value="">
+                Error al cargar categorías
+            </option>
+        `;
+    }
 }
 
 async function eliminarTarea(id) {
@@ -535,7 +603,7 @@ async function editarTarea(id) {
 
     if (t.tipoTarea === "ACTUALIZAR_APP") {
         document.getElementById("txtUrlApk").value =
-            t.parametros || "https://github.com/amoraless14/MonitoreoTablets/releases/download/V1.2/Monitoreo.apk";
+            t.parametros || "https://github.com/Abner100MS/MonitoreoTablets/releases/download/V1.6/Monitoreo.apk";
     }
 
 
@@ -671,213 +739,255 @@ let categorias = [];
 let dispositivosSeleccionados = [];
 
 
-
-async function cargarDispositivosSelector() {
-
-    const tbody = document.getElementById(
-        "tablaSeleccionDispositivos"
-    );
-
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="5" class="text-center py-4">
-                Cargando dispositivos...
-            </td>
-        </tr>
-    `;
-
-    try {
-
-        const url =
-            `/devices/lista-paginada` +
-            `?page=${paginaSelector}` +
-            `&size=${registrosSelector}` +
-            `&buscar=${encodeURIComponent(buscarSelector)}`;
-
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error("Error cargando dispositivos");
-        }
-
-        const data = await res.json();
-
-        totalPaginasSelector = data.totalPages;
-
-        tbody.innerHTML = "";
-
-        if (data.content.length === 0) {
-
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
-                        No se encontraron dispositivos
-                    </td>
-                </tr>
-            `;
-
-        } else {
-
-            data.content.forEach(t => {
-
-                const seleccionado =
-                    dispositivosSeleccionados.includes(t.id);
-
-                tbody.innerHTML += `
-                    <tr>
-
-                        <td>
-                            <input
-                                type="checkbox"
-                                class="chkDispositivo"
-                                value="${t.id}"
-                                ${seleccionado ? "checked" : ""}>
-                        </td>
-
-                        <td>${t.activo ?? ""}</td>
-
-                        <td>${t.deviceName ?? ""}</td>
-
-                        <td>${t.model ?? ""}</td>
-
-                        <td>${t.categoria ?? ""}</td>
-
-                    </tr>
-                `;
-            });
-        }
-
-        actualizarPaginacionSelector(
-            data.number,
-            data.totalPages,
-            data.totalElements
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-danger py-4">
-                    Error al cargar dispositivos
-                </td>
-            </tr>
-        `;
-    }
-}
-
-function actualizarPaginacionSelector(
-    pagina,
-    totalPaginas,
-    totalElementos
-) {
-
-    const inicio =
-        totalElementos === 0
-            ? 0
-            : (pagina * registrosSelector) + 1;
-
-    const fin = Math.min(
-        (pagina + 1) * registrosSelector,
-        totalElementos
-    );
-
-    document.getElementById(
-        "infoPaginacionSelector"
-    ).textContent =
-        `Mostrando ${inicio}-${fin} de ${totalElementos}`;
-
-
-    document.getElementById(
-        "paginaActualSelector"
-    ).textContent =
-        `Página ${pagina + 1} de ${Math.max(totalPaginas, 1)}`;
-
-
-    document.getElementById(
-        "btnAnteriorSelector"
-    ).disabled =
-        pagina <= 0;
-
-
-    document.getElementById(
-        "btnSiguienteSelector"
-    ).disabled =
-        pagina >= totalPaginas - 1;
-}
-
-
-async function cambiarPaginaSelector(direccion) {
-
-    guardarSeleccionPaginaActual();
-
-    const nuevaPagina =
-        paginaSelector + direccion;
-
-    if (
-        nuevaPagina < 0 ||
-        nuevaPagina >= totalPaginasSelector
-    ) {
-        return;
-    }
-
-    paginaSelector = nuevaPagina;
-
-    await cargarDispositivosSelector();
-}
-
-function guardarSeleccionPaginaActual() {
-
-    document.querySelectorAll(
-        "#tablaSeleccionDispositivos .chkDispositivo"
-    ).forEach(check => {
-
-        const id = Number(check.value);
-
-        if (check.checked) {
-
-            if (!dispositivosSeleccionados.includes(id)) {
-                dispositivosSeleccionados.push(id);
-            }
-
-        } else {
-
-            dispositivosSeleccionados =
-                dispositivosSeleccionados.filter(
-                    x => x !== id
-                );
-        }
-    });
-
-    document.getElementById(
-        "cantidadDispositivosSeleccionados"
-    ).textContent =
-        dispositivosSeleccionados.length;
-}
-
-
 let paginaSelector = 0;
 let totalPaginasSelector = 0;
 let registrosSelector = 25;
 let buscarSelector = "";
 let timeoutBusquedaSelector = null;
 
+let plantaSelector = "";
+let departamentoSelector = "";
+let categoriaSelector = "";
+let departamentosSelector = [];
+
+
+async function cargarFiltrosSelector() {
+
+    try {
+
+        const [resPlantas, resDepartamentos, resCategorias] =
+            await Promise.all([
+                fetch("/devices/plantas"),
+                fetch("/devices/departamentos"),
+                fetch("/devices/categorias")
+            ]);
+
+        const plantas = await resPlantas.json();
+        const departamentos = await resDepartamentos.json();
+        const categorias = await resCategorias.json();
+
+
+        // =========================
+        // PLANTAS
+        // =========================
+
+        const cmbPlanta =
+            document.getElementById("cmbPlantaSelector");
+
+        cmbPlanta.innerHTML =
+            `<option value="">Todas las plantas</option>`;
+
+        plantas.forEach(planta => {
+
+            cmbPlanta.innerHTML += `
+                <option value="${planta}">
+                    ${planta}
+                </option>
+            `;
+
+        });
+
+        // =========================
+        // DEPARTAMENTOS
+        // =========================
+
+        departamentosSelector = departamentos;
+
+        mostrarDepartamentosSelector("");
+
+
+        // =========================
+        // CATEGORÍAS
+        // =========================
+
+        const cmbCategoria =
+            document.getElementById("cmbCategoriaSelector");
+
+        cmbCategoria.innerHTML =
+            `<option value="">Todas las categorías</option>`;
+
+        categorias.forEach(categoria => {
+
+            cmbCategoria.innerHTML += `
+                <option value="${categoria}">
+                    ${categoria}
+                </option>
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando filtros del selector:",
+            error
+        );
+
+    }
+}
+
+
+function mostrarDepartamentosSelector(texto) {
+
+    const lista =
+        document.getElementById("listaDepartamentosSelector");
+
+    const busqueda = texto
+        .toLowerCase()
+        .trim();
+
+    const filtrados = departamentosSelector
+        .filter(departamento =>
+            departamento
+                .toLowerCase()
+                .includes(busqueda)
+        )
+        .slice(0, 5); // SOLO 5 RESULTADOS
+
+    lista.innerHTML = "";
+    if (busqueda === "") {
+
+        const todos = document.createElement("button");
+
+        todos.type = "button";
+        todos.className =
+            "dropdown-item selector-opcion-departamento";
+
+        todos.textContent = "Todos los departamentos";
+
+        todos.onclick = async function () {
+
+            departamentoSelector = "";
+
+            document.getElementById(
+                "btnDepartamentoSelector"
+            ).textContent = "Todos los departamentos";
+
+            bootstrap.Dropdown.getOrCreateInstance(
+                document.getElementById("btnDepartamentoSelector")
+            ).hide();
+
+            paginaSelector = 0;
+
+            await cargarDispositivosSelector();
+        };
+
+        lista.appendChild(todos);
+    }
+
+    if (filtrados.length === 0) {
+
+        lista.innerHTML = `
+            <div class="text-muted small px-2 py-2">
+                No se encontraron departamentos
+            </div>
+        `;
+
+        return;
+    }
+
+    filtrados.forEach(departamento => {
+
+        const opcion = document.createElement("button");
+
+        opcion.type = "button";
+        opcion.className =
+            "dropdown-item selector-opcion-departamento";
+
+        opcion.textContent = departamento;
+
+        opcion.onclick = function () {
+            seleccionarDepartamento(departamento);
+        };
+
+        lista.appendChild(opcion);
+    });
+}
+
+async function seleccionarDepartamento(departamento) {
+
+    departamentoSelector = departamento;
+
+    document.getElementById(
+        "btnDepartamentoSelector"
+    ).textContent = departamento;
+
+    document.getElementById(
+        "txtBuscarDepartamentoSelector"
+    ).value = "";
+
+    mostrarDepartamentosSelector("");
+
+    bootstrap.Dropdown.getOrCreateInstance(
+        document.getElementById("btnDepartamentoSelector")
+    ).hide();
+
+    paginaSelector = 0;
+
+    await cargarDispositivosSelector();
+}
 
 async function abrirSelectorDispositivos() {
 
     paginaSelector = 0;
-    buscarSelector = "";
 
-    document.getElementById("txtBuscarDispositivoTarea").value = "";
-    document.getElementById("cmbRegistrosSelector").value =
-        registrosSelector;
+    // Cargar las opciones de los filtros
+    await cargarFiltrosSelector();
+
+    // ==========================================
+    // RESTAURAR LOS FILTROS COMO LOS DEJAMOS
+    // ==========================================
+
+    document.getElementById(
+        "txtBuscarDispositivoTarea"
+    ).value = buscarSelector;
+
+    document.getElementById(
+        "cmbRegistrosSelector"
+    ).value = registrosSelector;
+
+    document.getElementById(
+        "cmbPlantaSelector"
+    ).value = plantaSelector;
+
+    document.getElementById(
+        "cmbCategoriaSelector"
+    ).value = categoriaSelector;
+
+
+    // ==========================================
+    // RESTAURAR DEPARTAMENTO
+    // ==========================================
+
+    if (departamentoSelector) {
+
+        document.getElementById(
+            "btnDepartamentoSelector"
+        ).textContent = departamentoSelector;
+
+    } else {
+
+        document.getElementById(
+            "btnDepartamentoSelector"
+        ).textContent = "Todos los departamentos";
+    }
+
+    document.getElementById(
+        "txtBuscarDepartamentoSelector"
+    ).value = "";
+
+    mostrarDepartamentosSelector("");
+
+
+    // ==========================================
+    // CARGAR DISPOSITIVOS CON LOS FILTROS
+    // QUE YA ESTABAN SELECCIONADOS
+    // ==========================================
 
     await cargarDispositivosSelector();
 
     modalDispositivos.show();
 }
-
 
 async function cargarDispositivosSelector() {
 
@@ -898,7 +1008,10 @@ async function cargarDispositivosSelector() {
             `/devices/lista-paginada` +
             `?page=${paginaSelector}` +
             `&size=${registrosSelector}` +
-            `&buscar=${encodeURIComponent(buscarSelector)}`;
+            `&buscar=${encodeURIComponent(buscarSelector)}` +
+            `&planta=${encodeURIComponent(plantaSelector)}` +
+            `&departamento=${encodeURIComponent(departamentoSelector)}` +
+            `&categoria=${encodeURIComponent(categoriaSelector)}`;
 
         const res = await fetch(url);
 
@@ -909,6 +1022,16 @@ async function cargarDispositivosSelector() {
         const pagina = await res.json();
 
         totalPaginasSelector = pagina.totalPages;
+
+        const cantidadResultados =
+            document.getElementById(
+                "cantidadResultadosSelector"
+            );
+
+        if (cantidadResultados) {
+            cantidadResultados.textContent =
+                pagina.totalElements;
+        }
 
         tbody.innerHTML = "";
 
@@ -927,27 +1050,42 @@ async function cargarDispositivosSelector() {
 
             pagina.content.forEach(t => {
 
-                const marcado =
-                    dispositivosSeleccionados.includes(t.id)
-                        ? "checked"
-                        : "";
+                const seleccionado =
+                    dispositivosSeleccionados.includes(t.id);
 
                 tbody.innerHTML += `
-                    <tr>
+                    <tr
+                        class="fila-dispositivo ${seleccionado ? "seleccionado" : ""}"
+                        data-id="${t.id}"
+                        onclick="seleccionarFilaDispositivo(this)">
 
-                        <td>
-                            <input
-                                class="form-check-input chkDispositivo"
-                                type="checkbox"
-                                value="${t.id}"
-                                ${marcado}>
+                        <td title="${t.activo ?? ""}">
+                            ${t.activo ?? ""}
                         </td>
 
-                        <td>${t.activo ?? ""}</td>
+                        <td title="${t.device_name ?? ""}">
+                            ${t.device_name ?? ""}
+                        </td>
 
-                        <td>${t.model ?? ""}</td>
+                        <td title="${t.empleado_asig ?? ""}">
+                            ${t.empleado_asig ?? ""}
+                        </td>
 
-                        <td>${t.categoria ?? ""}</td>
+                        <td title="${t.planta ?? ""}">
+                            ${t.planta ?? ""}
+                        </td>
+
+                        <td title="${t.area ?? ""}">
+                            ${t.area ?? ""}
+                        </td>
+
+                        <td title="${t.departamento ?? ""}">
+                            ${t.departamento ?? ""}
+                        </td>
+
+                        <td title="${t.categoria ?? ""}">
+                            ${t.categoria ?? ""}
+                        </td>
 
                     </tr>
                 `;
@@ -960,7 +1098,21 @@ async function cargarDispositivosSelector() {
             pagina.totalElements
         );
 
-        actualizarCantidadSeleccionados();
+        // Si "Seleccionar todos" continúa marcado,
+        // recalcular la selección usando los filtros actuales
+        const chkTodos =
+            document.getElementById(
+                "chkSeleccionarTodosResultados"
+            );
+
+        if (chkTodos && chkTodos.checked) {
+
+            await seleccionarTodosResultados(true);
+
+        } else {
+
+            actualizarCantidadSeleccionados();
+        }
 
     } catch (error) {
 
@@ -975,6 +1127,32 @@ async function cargarDispositivosSelector() {
             </tr>
         `;
     }
+}
+
+
+
+function seleccionarFilaDispositivo(fila) {
+
+    const id = Number(fila.dataset.id);
+
+    const indice = dispositivosSeleccionados.indexOf(id);
+
+    if (indice === -1) {
+
+        // No estaba seleccionado → seleccionar
+        dispositivosSeleccionados.push(id);
+
+        fila.classList.add("seleccionado");
+
+    } else {
+
+        // Ya estaba seleccionado → quitar selección
+        dispositivosSeleccionados.splice(indice, 1);
+
+        fila.classList.remove("seleccionado");
+    }
+
+    actualizarCantidadSeleccionados();
 }
 
 
@@ -1007,9 +1185,129 @@ function guardarSeleccionPaginaActual() {
 
 function actualizarCantidadSeleccionados() {
 
-    document.getElementById(
-        "cantidadDispositivosSeleccionados"
-    ).textContent = dispositivosSeleccionados.length;
+    const cantidad = dispositivosSeleccionados.length;
+
+    // Actualizar contador inferior
+    const contador =
+        document.getElementById(
+            "cantidadDispositivosSeleccionados"
+        );
+
+    if (contador) {
+        contador.textContent = cantidad;
+    }
+
+
+}
+
+
+async function seleccionarTodosResultados(seleccionar) {
+
+    const chkTodos =
+        document.getElementById(
+            "chkSeleccionarTodosResultados"
+        );
+
+    // Si desmarca "Seleccionar todos"
+    if (!seleccionar) {
+
+        dispositivosSeleccionados = [];
+
+        document
+            .querySelectorAll(
+                "#tablaSeleccionDispositivos .fila-dispositivo"
+            )
+            .forEach(fila => {
+                fila.classList.remove("seleccionado");
+            });
+
+        actualizarCantidadSeleccionados();
+
+        return;
+    }
+
+    try {
+
+        if (chkTodos) {
+            chkTodos.disabled = true;
+        }
+
+        const url =
+            `/devices/lista-paginada` +
+            `?page=0` +
+            `&size=100000` +
+            `&buscar=${encodeURIComponent(buscarSelector)}` +
+            `&planta=${encodeURIComponent(plantaSelector)}` +
+            `&departamento=${encodeURIComponent(departamentoSelector)}` +
+            `&categoria=${encodeURIComponent(categoriaSelector)}`;
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(
+                "Error obteniendo dispositivos"
+            );
+        }
+
+        const pagina = await res.json();
+
+
+        // ==========================================
+        // IMPORTANTE:
+        // La selección pasa a ser EXACTAMENTE
+        // los resultados del filtro actual
+        // ==========================================
+
+        dispositivosSeleccionados =
+            pagina.content.map(t => t.id);
+
+
+        // ==========================================
+        // ACTUALIZAR LAS FILAS VISIBLES
+        // ==========================================
+
+        document
+            .querySelectorAll(
+                "#tablaSeleccionDispositivos .fila-dispositivo"
+            )
+            .forEach(fila => {
+
+                const id =
+                    Number(fila.dataset.id);
+
+                if (
+                    dispositivosSeleccionados.includes(id)
+                ) {
+
+                    fila.classList.add("seleccionado");
+
+                } else {
+
+                    fila.classList.remove("seleccionado");
+                }
+
+            });
+
+
+        actualizarCantidadSeleccionados();
+
+    } catch (error) {
+
+        console.error(
+            "Error seleccionando todos los resultados:",
+            error
+        );
+
+        if (chkTodos) {
+            chkTodos.checked = false;
+        }
+
+    } finally {
+
+        if (chkTodos) {
+            chkTodos.disabled = false;
+        }
+    }
 }
 
 
@@ -1322,7 +1620,7 @@ function cambiarTipoTarea() {
         contenedor.style.display = "block";
 
         document.getElementById("txtUrlApk").value =
-            "https://github.com/amoraless14/MonitoreoTablets/releases/download/V1.2/Monitoreo.apk";
+            "https://github.com/Abner100MS/MonitoreoTablets/releases/download/V1.6/Monitoreo.apk";
 
     } else {
 
@@ -1385,6 +1683,50 @@ document.addEventListener("input", function (e) {
 
 document.addEventListener("change", async function (e) {
 
+    if (e.target.id === "chkSeleccionarTodosResultados") {
+
+        await seleccionarTodosResultados(
+            e.target.checked
+        );
+
+        return;
+    }
+
+    // =========================
+    // FILTRO PLANTA
+    // =========================
+
+    if (e.target.id === "cmbPlantaSelector") {
+
+        plantaSelector = e.target.value;
+        paginaSelector = 0;
+
+        await cargarDispositivosSelector();
+
+        return;
+    }
+
+
+    // =========================
+    // FILTRO CATEGORÍA
+    // =========================
+
+    if (e.target.id === "cmbCategoriaSelector") {
+
+        categoriaSelector = e.target.value;
+
+        paginaSelector = 0;
+
+        await cargarDispositivosSelector();
+
+        return;
+    }
+
+
+    // =========================
+    // CANTIDAD DE REGISTROS
+    // =========================
+
     if (e.target.id === "cmbRegistrosSelector") {
 
         guardarSeleccionPaginaActual();
@@ -1399,9 +1741,19 @@ document.addEventListener("change", async function (e) {
         return;
     }
 
-
     if (e.target.classList.contains("chkDispositivo")) {
-
         guardarSeleccionPaginaActual();
     }
+});
+
+document.addEventListener("input", function (e) {
+
+    if (e.target.id === "txtBuscarDepartamentoSelector") {
+
+        mostrarDepartamentosSelector(
+            e.target.value
+        );
+
+    }
+
 });

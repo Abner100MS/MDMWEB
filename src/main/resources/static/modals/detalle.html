@@ -1,0 +1,541 @@
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-dark text-white p-3">
+
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Detalles del Dispositivo:
+                    <span id="detalle-activo-label" class="badge bg-primary">
+                    </span>
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body p-0">
+
+                <div class="d-flex align-items-stretch">
+
+                    <!-- MENÚ LATERAL -->
+                    <div class="nav flex-column nav-pills p-3 bg-light border-end"
+                        style="width: 150px; min-height: 430px;" role="tablist">
+
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#detalle-dispositivo">
+
+                            <i class="bi bi-tablet me-2"></i>
+                            Dispositivo
+
+                        </button>
+
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#detalle-bateria">
+
+                            <i class="bi bi-battery-half me-2"></i>
+                            Batería
+
+                        </button>
+
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#detalle-extra">
+
+                            <i class="bi bi-info-square me-2"></i>
+                            extra
+
+                        </button>
+
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#detalle-diagnostico">
+
+                            <i class="bi bi-activity me-2"></i>
+                            Diagnóstico
+
+                        </button>
+
+                    </div>
+
+                    <!-- CONTENIDO -->
+                    <div class="tab-content p-4 flex-grow-1">
+
+                        <!-- ============================= -->
+                        <!-- DISPOSITIVO -->
+                        <!-- ============================= -->
+                        <div class="tab-pane fade show active" id="detalle-dispositivo">
+
+                            <h4 class="fw-bold mb-2">
+                                <i class="bi bi-tablet text-primary me-2"></i>
+                                Información del Dispositivo
+                            </h4>
+
+                            <!-- TARJETAS DE INFORMACIÓN -->
+                            <div class="row g-3 mt-2">
+
+                                <!-- ============================= -->
+                                <!-- INFORMACIÓN GENERAL -->
+                                <!-- ============================= -->
+                                <div class="col-lg-6">
+
+                                    <div class="detalle-card h-100">
+
+                                        <div class="detalle-card-titulo">
+                                            <i class="bi bi-tablet me-2"></i>
+                                            Información general
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Activo</span>
+                                            <strong id="detalleActivo">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Nombre del equipo</span>
+                                            <strong id="detalleNombreEquipo">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Modelo</span>
+                                            <strong id="detalleModelo">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Empleado</span>
+                                            <strong id="detalleEmpleado">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Código</span>
+                                            <strong id="detalleCodigo">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Área</span>
+                                            <strong id="detalleArea">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Departamento</span>
+                                            <strong id="detalleDepartamento">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Último reporte</span>
+                                            <strong id="detalleUltimoReporte">--</strong>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ============================= -->
+                                <!-- ESTADO -->
+                                <!-- ============================= -->
+                                <div class="col-lg-6 ">
+
+                                    <div class="detalle-card h-100">
+
+                                        <div class="detalle-card-titulo">
+                                            <i class="bi bi-shield-check me-2"></i>
+                                            Estado
+                                        </div>
+
+                                        <!-- ESTADO GENERAL -->
+                                        <div class="detalle-estado-general" id="detalleEstadoGeneral">
+
+                                            <i class="bi bi-x-check-circle-fill"></i>
+
+                                            <div>
+                                                <strong id="detalleEstadoTitulo">
+                                                    Todo está bien
+                                                </strong>
+
+                                                <small id="detalleEstadoDescripcion">
+                                                    El dispositivo no requiere atención.
+                                                </small>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Versión de Android</span>
+                                            <strong id="detalleAndroid">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Parche de seguridad</span>
+                                            <strong id="detalleParcheSeguridad">--</strong>
+                                        </div>
+
+                                        <!-- ESTA FILA CAMBIARÁ A AMARILLO SI HAY UPDATE -->
+                                        <div class="detalle-fila detalle-actualizacion" id="detalleFilaActualizacion">
+
+                                            <span>Actualización</span>
+
+                                            <strong id="detalleActualizacion">
+                                                --
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ============================= -->
+                        <!-- BATERÍA -->
+                        <!-- ============================= -->
+                        <div class="tab-pane fade" id="detalle-bateria">
+
+                            <h4 class="fw-bold mb-2">
+                                <i class="bi bi-battery-half text-primary me-2"></i>
+                                Estado de Batería
+                            </h4>
+
+                            <div class="bateria-config-card">
+
+                                <div class="row g-3">
+
+                                    <!-- ESTADO -->
+                                    <div class="col-md-7">
+
+                                        <div class="bateria-campo-header">
+                                            <div class="bateria-campo-icono">
+                                                <i class="bi bi-battery-half"></i>
+                                            </div>
+
+                                            <div>
+                                                <label for="detalleEstadoBateria" class="bateria-campo-titulo">
+                                                    Estado de batería
+                                                </label>
+
+                                                <div class="bateria-campo-subtitulo">
+                                                    Condición física actual
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <select id="detalleEstadoBateria" class="form-select bateria-select"
+                                            onchange="cambiarEstadoBateriaDetalle()">
+
+                                            <option value="NORMAL">
+                                                Normal
+                                            </option>
+
+                                            <option value="INFLADA">
+                                                Batería inflada
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <!-- PORCENTAJE -->
+                                    <div class="col-md-5">
+
+                                        <div class="bateria-campo-header">
+                                            <div class="bateria-campo-icono">
+                                                <i class="bi bi-percent"></i>
+                                            </div>
+
+                                            <div>
+                                                <label for="detallePorcentajeInflado" class="bateria-campo-titulo">
+                                                    Nivel de inflado
+                                                </label>
+
+                                                <div class="bateria-campo-subtitulo">
+                                                    Estimación visual
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <select id="detallePorcentajeInflado" class="form-select bateria-select"
+                                            disabled>
+
+                                            <option value="">
+                                                Seleccionar
+                                            </option>
+
+                                            <option value="10">
+                                                10% - Leve
+                                            </option>
+
+                                            <option value="25">
+                                                25% - Moderado
+                                            </option>
+
+                                            <option value="50">
+                                                50% - Alto
+                                            </option>
+
+                                            <option value="75">
+                                                75% - Muy alto
+                                            </option>
+
+                                            <option value="100">
+                                                100% - Crítico
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="bateria-nota">
+                                    <i class="bi bi-info-circle"></i>
+
+                                    <span>
+                                        El nivel de inflado corresponde a una estimación visual
+                                        del estado físico de la batería.
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="mt-4 pt-3 border-top">
+
+                                <div class="row g-3">
+
+                                    <!-- ÚLTIMA MODIFICACIÓN -->
+                                    <div class="col-md-6">
+                                        <div class="detalle-auditoria-card auditoria-ultima">
+
+                                            <div class="detalle-auditoria-titulo">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                Última modificación
+                                            </div>
+
+                                            <div id="bateriaUltimoUsuario" class="detalle-auditoria-usuario">
+                                                Sin registro
+                                            </div>
+
+                                            <div id="bateriaUltimaFecha" class="detalle-auditoria-fecha">
+                                                -
+                                            </div>
+
+                                            <div id="bateriaUltimoDetalle" class="detalle-auditoria-detalle">
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <!-- MODIFICACIÓN ANTERIOR -->
+                                    <div class="col-md-6">
+                                        <div class="detalle-auditoria-card auditoria-anterior">
+
+                                            <div class="detalle-auditoria-titulo">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                                Modificación anterior
+                                            </div>
+
+                                            <div id="bateriaAnteriorUsuario" class="detalle-auditoria-usuario">
+                                                Sin registro
+                                            </div>
+
+                                            <div id="bateriaAnteriorFecha" class="detalle-auditoria-fecha">
+                                                -
+                                            </div>
+
+                                            <div id="bateriaAnteriorDetalle" class="detalle-auditoria-detalle">
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ============================= -->
+                        <!-- DETALLES EXTRA -->
+                        <!-- ============================= -->
+                        <div class="tab-pane fade" id="detalle-extra">
+
+                            <h4 class="fw-bold mb-2">
+                                <i class="bi bi-info-square text-primary me-2"></i>
+                                Detalles extra
+                            </h4>
+
+                            <div class="row g-3 mt-2">
+
+                                <div class="col-lg-6">
+
+                                    <div class="detalle-card">
+
+                                        <div class="detalle-card-titulo">
+                                            <i class="bi bi-cpu me-2"></i>
+                                            Recursos del dispositivo
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>RAM</span>
+                                            <strong id="detalleRam">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>Almacenamiento</span>
+                                            <strong id="detalleAlmacenamiento">--</strong>
+                                        </div>
+
+                                        <div class="detalle-fila">
+                                            <span>IMEI</span>
+                                            <strong id="detalleImei">--</strong>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- DIAGNÓSTICO -->
+                        <!-- ============================= -->
+                        <div class="tab-pane fade" id="detalle-diagnostico">
+
+                            <h4 class="fw-bold mb-3">
+                                <i class="bi bi-activity text-primary me-2"></i>
+                                Diagnóstico de comunicación
+                            </h4>
+
+                            <div class="detalle-card">
+
+                                <div class="detalle-card-titulo">
+                                    <i class="bi bi-broadcast me-2"></i>
+                                    Estado de comunicación
+                                </div>
+
+                                <div class="detalle-fila">
+                                    <span>WebSocket</span>
+
+                                    <strong id="diagnosticoWebSocket">
+                                        <span class="text-muted">Sin comprobar</span>
+                                    </strong>
+                                </div>
+
+                                <div class="detalle-fila">
+                                    <span>Envío de comando</span>
+
+                                    <strong id="diagnosticoComando">
+                                        <span class="text-muted">Sin comprobar</span>
+                                    </strong>
+                                </div>
+
+                                <div class="detalle-fila">
+                                    <span>Respuesta de la tablet (ACK)</span>
+
+                                    <strong id="diagnosticoAck">
+                                        <span class="text-muted">Sin comprobar</span>
+                                    </strong>
+                                </div>
+
+                                <div class="detalle-fila">
+                                    <span>Tiempo de respuesta</span>
+
+                                    <strong id="diagnosticoLatencia">
+                                        --
+                                    </strong>
+                                </div>
+
+                            </div>
+
+
+                            <div id="diagnosticoResultado"
+                                class="alert alert-secondary d-flex align-items-center mt-3 mb-3">
+
+                                <i id="diagnosticoResultadoIcono" class="bi bi-info-circle-fill me-3"></i>
+
+                                <div>
+                                    <strong id="diagnosticoResultadoTitulo">
+                                        Diagnóstico no ejecutado
+                                    </strong>
+
+                                    <div id="diagnosticoResultadoMensaje" class="small">
+                                        Ejecuta la prueba para verificar la comunicación remota.
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-center">
+
+                                <button type="button" id="btnEjecutarDiagnostico" class="btn btn-success"
+                                    onclick="ejecutarDiagnosticoDispositivo()">
+
+                                    <i class="bi bi-play-circle me-2"></i>
+                                    Ejecutar diagnóstico
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer bg-light">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cerrar
+                    </button>
+
+                    <button type="button" class="btn btn-primary px-4" onclick="guardarDetalleDispositivo()">
+
+                        <i class="bi bi-floppy me-2"></i>
+                        Guardar Cambios
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+
+        <div id="toastDetalle" class="toast border-0 shadow-lg bg-white" role="alert" aria-live="assertive"
+            aria-atomic="true">
+
+            <div class="toast-header">
+                <i id="toastDetalleIcono" class="bi bi-check-circle-fill text-success me-2"></i>
+
+                <strong id="toastDetalleTitulo" class="me-auto">
+                    Cambios guardados
+                </strong>
+
+                <button type="button" class="btn-close" data-bs-dismiss="toast">
+                </button>
+            </div>
+
+            <div id="toastDetalleMensaje" class="toast-body">
+            </div>
+
+        </div>
+
+    </div>

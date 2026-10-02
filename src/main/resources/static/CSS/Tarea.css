@@ -1,0 +1,154 @@
+/* =========================================================
+   MODAL - SELECTOR DE DISPOSITIVOS
+   ========================================================= */
+
+#modalDispositivos .modal-dialog {
+    max-width: 1050px;
+}
+
+
+/* FILA DE FILTROS */
+
+#modalDispositivos .selector-filtros {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 1.4fr) minmax(145px, 0.8fr) minmax(190px, 1.1fr) minmax(160px, 0.9fr) 135px;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+
+/* TODOS LOS CONTROLES DEL MISMO TAMAÑO */
+
+#modalDispositivos .selector-filtros .form-control,
+#modalDispositivos .selector-filtros .form-select,
+#modalDispositivos .selector-filtros .input-group-text {
+    height: 36px;
+    font-size: 13px;
+}
+
+
+/* BUSCADOR */
+
+#modalDispositivos .selector-buscador {
+    width: 100%;
+}
+
+
+/* FILA: SELECCIONAR TODOS + TOTAL */
+
+#modalDispositivos .selector-acciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 30px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+
+/* TEXTO DE RESULTADOS */
+
+#modalDispositivos .selector-total {
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   TABLA SELECTOR DE DISPOSITIVOS
+   ========================================================= */
+
+#modalDispositivos .table-responsive {
+    width: 100%;
+    overflow-x: hidden !important;
+}
+
+#modalDispositivos .table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    margin-bottom: 0;
+}
+
+#modalDispositivos .table th,
+#modalDispositivos .table td {
+    padding: 7px 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#modalDispositivos .table th {
+    font-size: 10px;
+}
+
+#modalDispositivos .table td {
+    font-size: 12px;
+}
+
+/* LISTA BUSCABLE DE DEPARTAMENTOS */
+#modalDispositivos .selector-dropdown {
+    position: relative;
+}
+
+#modalDispositivos .selector-dropdown-menu {
+    position: absolute !important;
+    z-index: 1080;
+    width: 100%;
+    min-width: 230px;
+    padding: 6px;
+}
+
+
+#modalDispositivos .selector-lista-opciones {
+    overflow: visible;
+}
+
+#modalDispositivos .selector-opcion-departamento {
+    font-size: 13px;
+    padding: 6px 10px;
+}
+
+
+/* FILAS SELECCIONABLES */
+#modalDispositivos .fila-dispositivo {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+/* PASAR EL MOUSE */
+#modalDispositivos .fila-dispositivo:hover td {
+    background-color: #eef5ff;
+}
+
+/* FILA SELECCIONADA */
+#modalDispositivos .fila-dispositivo.seleccionado td {
+    background-color: #dbeafe !important;
+}
+
+/* TEXTO DE FILA SELECCIONADA */
+#modalDispositivos .fila-dispositivo.seleccionado {
+    font-weight: 500;
+}
+
+
+/* =========================================
+   TABLA PRINCIPAL DE TAREAS - RESPONSIVE
+   ========================================= */
+
+.tabla-tareas-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabla-tareas-scroll table {
+    width: 100%;
+    min-width: 950px;
+    white-space: nowrap;
+}

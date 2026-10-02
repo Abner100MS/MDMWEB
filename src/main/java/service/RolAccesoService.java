@@ -39,4 +39,10 @@ public class RolAccesoService {
             .orElse(null);
 }
 
+public RolAcceso obtenerActivoPorRol(String rol) {
+    return rolAccesoRepository
+            .findFirstByRolIgnoreCaseAndActivoTrue(rol)
+            .orElse(null);
+}
+
 }

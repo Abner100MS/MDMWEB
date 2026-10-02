@@ -112,6 +112,13 @@ public class UsuarioService {
 
     }
 
+    @Transactional(readOnly = true)
+    public Usuario obtenerUsuarioActivo(String usuario) {
+
+        return usuarioRepository.findByUsuarioAndActivoTrue(usuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado o inactivo."));
+    }
+
     private UsuarioDTO convertirDTO(Usuario usuario) {
 
         UsuarioDTO dto = new UsuarioDTO();

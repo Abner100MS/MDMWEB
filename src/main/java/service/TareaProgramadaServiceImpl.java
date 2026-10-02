@@ -771,7 +771,18 @@ public class TareaProgramadaServiceImpl implements TareaProgramadaService {
 
         } else if (dto.getDestinoTarea() == DestinoTarea.PLANTA) {
 
-            tablets = tabletRepository.obtenerPorPlanta(dto.getValorDestino());
+            tablets = tabletRepository.obtenerPorPlanta(
+                    dto.getValorDestino());
+
+        } else if (dto.getDestinoTarea() == DestinoTarea.DEPARTAMENTO) {
+
+            tablets = tabletRepository.obtenerPorDepartamento(
+                    dto.getValorDestino());
+
+        } else if (dto.getDestinoTarea() == DestinoTarea.EMPLEADO) {
+
+            tablets = tabletRepository.obtenerPorEmpleado(
+                    dto.getValorDestino());
 
         } else {
 
@@ -791,6 +802,7 @@ public class TareaProgramadaServiceImpl implements TareaProgramadaService {
         }
 
         tareaProgramadaDispositivoRepository.saveAll(detalles);
+
         return detalles.size();
     }
 
@@ -975,6 +987,26 @@ public class TareaProgramadaServiceImpl implements TareaProgramadaService {
                 lista,
                 pageable,
                 pagina.getTotalElements());
+    }
+
+    @Override
+    public List<String> obtenerPlantas() {
+        return tabletRepository.obtenerPlantas();
+    }
+
+    @Override
+    public List<String> obtenerCategorias() {
+        return tabletRepository.obtenerCategorias();
+    }
+
+    @Override
+    public List<String> obtenerDepartamentos() {
+        return tabletRepository.obtenerDepartamentos();
+    }
+
+    @Override
+    public List<String> obtenerEmpleados() {
+        return tabletRepository.obtenerEmpleados();
     }
 
 }

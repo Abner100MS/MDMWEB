@@ -1,23 +1,31 @@
 package controller;
 
+import Entidad.AuditoriaDispositivo;
+import Entidad.RolAcceso;
 import Entidad.Tablet;
+import Entidad.ActivoInfo;
 import service.TabletService;
+import service.UsuarioService;
 import service.WebTitleService;
 import repository.TabletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
-import Dto.TabletDashboardDTO;
 import Dto.TabletDashboardProjection;
 import Dto.WebUrlDTO;
 import Dto.DashboardDTO;
 import Dto.LocationDTO;
 import java.util.stream.Collectors;
 import com.example.monitoreo.MdmSocketHandler;
+
+import service.AuditoriaDispositivoService;
 import service.GpsHistoryService;
 import service.ReglaAppsService;
+import service.RolAccesoService;
 import Dto.PolicyDTO;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import exception.GpsTrackingAlreadyActiveException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +35,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import Entidad.Usuario;
+import Dto.RestriccionInstalacionMasivaRequest;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -44,6 +54,15 @@ public class TabletController {
 
         @Autowired
         private ReglaAppsService reglaAppsService;
+
+        @Autowired
+        private RolAccesoService rolAccesoService;
+
+        @Autowired
+        private AuditoriaDispositivoService auditoriaDispositivoService;
+
+        @Autowired
+        private UsuarioService usuarioService;
 
         // La app llama a /devices/register
         @PostMapping("/register")
@@ -64,15 +83,41 @@ public class TabletController {
 
                 if (dispositivoNuevo) {
 
+                        // ==============================
+                        // REGLA INICIAL DE APLICACIONES
+                        // ==============================
+
                         var packages = reglaAppsService.obtenerReglaEfectiva(t);
 
                         respuesta.put("apps_rule", packages);
+
+                        // ==============================
+                        // CREDENCIALES INICIALES
+                        // ==============================
+
+                        RolAcceso admin = rolAccesoService.obtenerActivoPorRol("ADMIN");
+
+                        RolAcceso tecnico = rolAccesoService.obtenerActivoPorRol("TECNICO");
+
+                        Map<String, String> credenciales = new java.util.LinkedHashMap<>();
+
+                        if (admin != null) {
+                                credenciales.put("ADMIN", admin.getPassword());
+                        }
+
+                        if (tecnico != null) {
+                                credenciales.put("TECNICO", tecnico.getPassword());
+                        }
+
+                        respuesta.put("credentials", credenciales);
 
                         System.out.println(
                                         "VINCULACION NUEVA | ACTIVO=" +
                                                         t.getActivo() +
                                                         " | REGLA ENVIADA=" +
-                                                        packages.size());
+                                                        packages.size() +
+                                                        " | CREDENCIALES ENVIADAS=" +
+                                                        credenciales.size());
 
                 } else {
 
@@ -81,6 +126,64 @@ public class TabletController {
                                                         t.getActivo() +
                                                         " | NO SE MODIFICA REGLA DE APPS");
                 }
+
+                return ResponseEntity.ok(respuesta);
+        }
+
+        @PostMapping("/restrictions/install-apps/bulk")
+        public ResponseEntity<?> cambiarRestriccionInstalacionMasiva(
+                        @RequestBody RestriccionInstalacionMasivaRequest request) {
+
+                if (request.getActivos() == null || request.getActivos().isEmpty()) {
+                        return ResponseEntity.badRequest()
+                                        .body("Debe enviar al menos un activo.");
+                }
+
+                List<String> exitosos = new ArrayList<>();
+                List<String> errores = new ArrayList<>();
+
+                for (String activo : request.getActivos()) {
+
+                        try {
+
+                                // Modifica únicamente las restricciones necesarias
+                                Tablet tabletActualizada = tabletService.cambiarRestriccionesInstalacionMasiva(
+                                                activo,
+                                                request.isBloquear());
+
+                                // Enviar configuración actualizada a la tablet
+                                String jsonResponse = objectMapper.writeValueAsString(tabletActualizada);
+
+                                MdmSocketHandler.enviarOrden(
+                                                tabletActualizada.getId().toString(),
+                                                jsonResponse);
+
+                                exitosos.add(activo);
+
+                                System.out.println(
+                                                "RESTRICCIONES MASIVAS | ACTIVO=" + activo +
+                                                                " | INSTALL_APPS=" + request.isBloquear() +
+                                                                " | DEVELOPER=false" +
+                                                                " | FACTORY_RESET=false");
+
+                        } catch (Exception e) {
+
+                                errores.add(activo);
+
+                                System.err.println(
+                                                "ERROR RESTRICCIONES MASIVAS | ACTIVO=" +
+                                                                activo + " | " + e.getMessage());
+                        }
+                }
+
+                Map<String, Object> respuesta = new HashMap<>();
+
+                respuesta.put("bloquearInstalacion", request.isBloquear());
+                respuesta.put("developer", false);
+                respuesta.put("factoryReset", false);
+                respuesta.put("totalSolicitados", request.getActivos().size());
+                respuesta.put("exitosos", exitosos);
+                respuesta.put("errores", errores);
 
                 return ResponseEntity.ok(respuesta);
         }
@@ -115,6 +218,105 @@ public class TabletController {
                 return ResponseEntity.ok(tablet);
         }
 
+        @GetMapping("/{id}/online")
+        public ResponseEntity<?> estadoOnline(@PathVariable Long id) {
+
+                boolean online = MdmSocketHandler.estaTabletConectada(
+                                String.valueOf(id));
+
+                return ResponseEntity.ok(
+                                Map.of("online", online));
+        }
+
+        @GetMapping("/{id}/diagnostico")
+        public ResponseEntity<?> diagnosticarTablet(
+                        @PathVariable Long id) {
+
+                // =========================================
+                // BUSCAR TABLET
+                // =========================================
+
+                Tablet tablet = tabletRepository.findById(id)
+                                .orElse(null);
+
+                if (tablet == null) {
+
+                        return ResponseEntity
+                                        .status(HttpStatus.NOT_FOUND)
+                                        .body(
+                                                        Map.of(
+                                                                        "success", false,
+                                                                        "message", "Tablet no encontrada",
+                                                                        "id", id));
+                }
+
+                String deviceId = tablet.getId().toString();
+
+                // =========================================
+                // EJECUTAR DIAGNÓSTICO WEBSOCKET
+                // =========================================
+
+                Map<String, Object> diagnostico = MdmSocketHandler.diagnosticarConexion(
+                                deviceId);
+
+                // =========================================
+                // ARMAR RESPUESTA
+                // =========================================
+
+                Map<String, Object> respuesta = new java.util.LinkedHashMap<>();
+
+                respuesta.put(
+                                "success",
+                                Boolean.TRUE.equals(
+                                                diagnostico.get("ackReceived")));
+
+                respuesta.put(
+                                "id",
+                                tablet.getId());
+
+                respuesta.put(
+                                "activo",
+                                tablet.getActivo());
+
+                respuesta.put(
+                                "deviceName",
+                                tablet.getDeviceName());
+
+                respuesta.put(
+                                "webSocket",
+                                diagnostico.get("webSocket"));
+
+                respuesta.put(
+                                "commandSent",
+                                diagnostico.get("commandSent"));
+
+                respuesta.put(
+                                "ackReceived",
+                                diagnostico.get("ackReceived"));
+
+                respuesta.put(
+                                "latencyMs",
+                                diagnostico.get("latencyMs"));
+
+                respuesta.put(
+                                "appVersion",
+                                tablet.getAppVersion());
+
+                respuesta.put(
+                                "androidVersion",
+                                tablet.getOsVersion());
+
+                respuesta.put(
+                                "lastConnection",
+                                tablet.getLastConnection());
+
+                respuesta.put(
+                                "message",
+                                diagnostico.get("message"));
+
+                return ResponseEntity.ok(respuesta);
+        }
+
         @GetMapping("/{id}/historial-cargador")
         public List<Object[]> obtenerHistorialCargador(
                         @PathVariable Long id,
@@ -140,14 +342,20 @@ public class TabletController {
                         @RequestParam(defaultValue = "") String planta,
 
                         @RequestParam(defaultValue = "") String categoria,
+
+                        @RequestParam(defaultValue = "") String version,
+
                         @RequestParam(defaultValue = "") String estado,
 
-                        @RequestParam(defaultValue = "") String estadoCargador) {
+                        @RequestParam(defaultValue = "") String estadoCargador,
+
+                        @RequestParam(defaultValue = "") String estadoBateria) {
 
                 Pageable pageable = PageRequest.of(page, size);
 
                 System.out.println("PLANTA = [" + planta + "]");
                 System.out.println("CATEGORIA = [" + categoria + "]");
+                System.out.println("VERSION = [" + version + "]");
                 System.out.println("BUSCAR = [" + buscar + "]");
                 System.out.println("ESTADO = [" + estadoCargador + "]");
 
@@ -155,18 +363,272 @@ public class TabletController {
                                 buscar,
                                 planta,
                                 categoria,
+                                version,
                                 estadoCargador,
                                 estado,
+                                estadoBateria,
                                 pageable);
         }
 
         @PostMapping("/refresh")
-        public ResponseEntity<Void> actualizarDispositivos() {
+        public ResponseEntity<?> actualizarDispositivos() {
 
-                MdmSocketHandler.obtenerTabletsConectadas()
-                                .forEach(MdmSocketHandler::solicitarActualizacion);
+                List<Tablet> tablets = tabletRepository.findAll();
 
-                return ResponseEntity.ok().build();
+                java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(20);
+
+                List<java.util.concurrent.Future<?>> resultados = new java.util.ArrayList<>();
+
+                java.util.concurrent.atomic.AtomicInteger respondiendo = new java.util.concurrent.atomic.AtomicInteger(
+                                0);
+
+                java.util.concurrent.atomic.AtomicInteger sinRespuesta = new java.util.concurrent.atomic.AtomicInteger(
+                                0);
+
+                for (Tablet tablet : tablets) {
+
+                        java.util.concurrent.Future<?> future = executor.submit(() -> {
+
+                                String deviceId = tablet.getId().toString();
+
+                                try {
+
+                                        // =========================================
+                                        // 1. VERIFICAR SI EXISTE WEBSOCKET
+                                        // =========================================
+
+                                        if (!MdmSocketHandler.estaTabletConectada(deviceId)) {
+
+                                                tablet.setSinRespuesta(true);
+                                                tabletRepository.save(tablet);
+
+                                                sinRespuesta.incrementAndGet();
+
+                                                System.out.println(
+                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
+                                                                                + " | SIN WEBSOCKET");
+
+                                                return;
+                                        }
+
+                                        // =========================================
+                                        // 2. SOLICITAR INFORMACIÓN ACTUALIZADA
+                                        // =========================================
+
+                                        MdmSocketHandler.solicitarActualizacion(deviceId);
+
+                                        // =========================================
+                                        // 3. COMPROBAR QUE REALMENTE RESPONDA
+                                        // =========================================
+
+                                        boolean responde = MdmSocketHandler.verificarConexion(deviceId);
+
+                                        if (responde) {
+
+                                                tablet.setSinRespuesta(false);
+                                                respondiendo.incrementAndGet();
+
+                                                System.out.println(
+                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
+                                                                                + " | RESPONDE");
+
+                                        } else {
+
+                                                tablet.setSinRespuesta(true);
+                                                sinRespuesta.incrementAndGet();
+
+                                                System.out.println(
+                                                                "REFRESH | ACTIVO=" + tablet.getActivo()
+                                                                                + " | NO RESPONDE");
+                                        }
+
+                                        tabletRepository.save(tablet);
+
+                                } catch (Exception e) {
+
+                                        tablet.setSinRespuesta(true);
+                                        tabletRepository.save(tablet);
+
+                                        sinRespuesta.incrementAndGet();
+
+                                        System.err.println(
+                                                        "REFRESH ERROR | ACTIVO="
+                                                                        + tablet.getActivo()
+                                                                        + " | "
+                                                                        + e.getMessage());
+                                }
+                        });
+
+                        resultados.add(future);
+                }
+
+                // Esperar que todas las verificaciones terminen
+                for (java.util.concurrent.Future<?> resultado : resultados) {
+
+                        try {
+                                resultado.get();
+                        } catch (Exception e) {
+                                System.err.println(
+                                                "ERROR ESPERANDO REFRESH: "
+                                                                + e.getMessage());
+                        }
+                }
+
+                executor.shutdown();
+
+                System.out.println(
+                                "REFRESH FINALIZADO"
+                                                + " | TOTAL=" + tablets.size()
+                                                + " | RESPONDIENDO=" + respondiendo.get()
+                                                + " | SIN_RESPUESTA=" + sinRespuesta.get());
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "total", tablets.size(),
+                                                "respondiendo", respondiendo.get(),
+                                                "sinRespuesta", sinRespuesta.get()));
+        }
+
+        @PostMapping("/sync-credentials")
+        public ResponseEntity<?> sincronizarCredenciales() {
+
+                RolAcceso admin = rolAccesoService.obtenerActivoPorRol("ADMIN");
+
+                RolAcceso tecnico = rolAccesoService.obtenerActivoPorRol("TECNICO");
+
+                if (admin == null || tecnico == null) {
+
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message",
+                                                        "No se encontraron credenciales activas de ADMIN y TECNICO"));
+                }
+
+                int enviados = 0;
+
+                for (String deviceId : MdmSocketHandler.obtenerTabletsConectadas()) {
+
+                        try {
+
+                                String comando = objectMapper.writeValueAsString(
+                                                Map.of(
+                                                                "pending_command",
+                                                                "sync_credentials",
+
+                                                                "ADMIN",
+                                                                admin.getPassword(),
+
+                                                                "TECNICO",
+                                                                tecnico.getPassword()));
+
+                                MdmSocketHandler.enviarOrden(
+                                                deviceId,
+                                                comando);
+
+                                enviados++;
+
+                        } catch (Exception e) {
+
+                                System.err.println(
+                                                "ERROR ENVIANDO CREDENCIALES A TABLET "
+                                                                + deviceId);
+
+                                e.printStackTrace();
+                        }
+                }
+
+                System.out.println(
+                                "SINCRONIZACION CREDENCIALES | TABLETS ENVIADAS="
+                                                + enviados);
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "message",
+                                                "Credenciales enviadas a dispositivos conectados",
+                                                "enviados",
+                                                enviados));
+        }
+
+        @PostMapping("/sync-credentials/{activo}")
+        public ResponseEntity<?> sincronizarCredencialesIndividual(
+                        @PathVariable String activo) {
+
+                Tablet tablet = tabletRepository.findByActivo(activo)
+                                .orElse(null);
+
+                if (tablet == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "Tablet no encontrada",
+                                                        "activo", activo));
+                }
+
+                RolAcceso admin = rolAccesoService.obtenerActivoPorRol("ADMIN");
+                RolAcceso tecnico = rolAccesoService.obtenerActivoPorRol("TECNICO");
+
+                if (admin == null || tecnico == null) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message",
+                                                        "No se encontraron credenciales activas de ADMIN y TECNICO"));
+                }
+
+                String deviceId = tablet.getId().toString();
+
+                if (!MdmSocketHandler.estaTabletConectada(deviceId)) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "activo", activo,
+                                                        "message",
+                                                        "La tablet no está conectada"));
+                }
+
+                try {
+
+                        String comando = objectMapper.writeValueAsString(
+                                        Map.of(
+                                                        "pending_command",
+                                                        "sync_credentials",
+
+                                                        "ADMIN",
+                                                        admin.getPassword(),
+
+                                                        "TECNICO",
+                                                        tecnico.getPassword()));
+
+                        MdmSocketHandler.enviarOrden(
+                                        deviceId,
+                                        comando);
+
+                        System.out.println(
+                                        "SINCRONIZACION CREDENCIALES INDIVIDUAL"
+                                                        + " | ACTIVO=" + activo
+                                                        + " | ID=" + deviceId);
+
+                        return ResponseEntity.ok(
+                                        Map.of(
+                                                        "success", true,
+                                                        "activo", activo,
+                                                        "message",
+                                                        "Credenciales enviadas a la tablet"));
+
+                } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "activo", activo,
+                                                        "message",
+                                                        "Error enviando las credenciales"));
+                }
         }
 
         @GetMapping("/dashboard")
@@ -183,6 +645,7 @@ public class TabletController {
                         @RequestParam(defaultValue = "") String categoria,
                         @RequestParam(defaultValue = "") String estadoCargador,
                         @RequestParam(defaultValue = "") String estado,
+                        @RequestParam(defaultValue = "") String estadoBateria,
                         @RequestParam(defaultValue = "") String columnas) throws IOException {
 
                 byte[] excel = tabletService.obtenerReporte(
@@ -191,12 +654,15 @@ public class TabletController {
                                 categoria,
                                 estadoCargador,
                                 estado,
+                                estadoBateria,
                                 columnas);
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.parseMediaType(
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-                headers.set(HttpHeaders.CONTENT_DISPOSITION,
+
+                headers.set(
+                                HttpHeaders.CONTENT_DISPOSITION,
                                 "attachment; filename=Reporte_MDM.xlsx");
 
                 return new ResponseEntity<>(excel, headers, HttpStatus.OK);
@@ -214,6 +680,17 @@ public class TabletController {
                 return tabletService.obtenerCategorias();
         }
 
+        @GetMapping("/departamentos")
+        public List<String> obtenerDepartamentos() {
+
+                return tabletService.obtenerDepartamentos();
+        }
+
+        @GetMapping("/versions")
+        public List<String> obtenerVersionesApp() {
+                return tabletService.obtenerVersionesApp();
+        }
+
         @GetMapping("/lista")
         public List<Tablet> obtenerTablets() {
 
@@ -221,18 +698,27 @@ public class TabletController {
         }
 
         @GetMapping("/lista-paginada")
-        public Page<Tablet> obtenerTabletsPaginadas(
+        public Page<TabletDashboardProjection> obtenerTabletsPaginadas(
 
                         @RequestParam(defaultValue = "0") int page,
 
                         @RequestParam(defaultValue = "25") int size,
 
-                        @RequestParam(defaultValue = "") String buscar) {
+                        @RequestParam(defaultValue = "") String buscar,
+
+                        @RequestParam(defaultValue = "") String planta,
+
+                        @RequestParam(defaultValue = "") String departamento,
+
+                        @RequestParam(defaultValue = "") String categoria) {
 
                 Pageable pageable = PageRequest.of(page, size);
 
                 return tabletService.obtenerTabletsSelector(
                                 buscar,
+                                planta,
+                                departamento,
+                                categoria,
                                 pageable);
         }
 
@@ -458,6 +944,7 @@ public class TabletController {
                         System.out.println("REINICIO = " + config.getConfigReinicio());
                         System.out.println("RESTRICCIONES = " + config.getRestricciones());
                         System.out.println("URLS = " + config.getUrlsPermitidas());
+                        System.out.println("MODO KIOSCO = " + config.getModoKiosco());
                         System.out.println("========================================");
 
                         // =============================================
@@ -581,6 +1068,19 @@ public class TabletController {
 
                 return tabletRepository.findByActivo(activo)
                                 .orElseThrow(() -> new RuntimeException("Tablet no encontrada"));
+        }
+
+        @GetMapping("/activo-info/{activo}")
+        public ResponseEntity<?> obtenerInformacionActivo(
+                        @PathVariable String activo) {
+
+                ActivoInfo info = tabletService.obtenerActivoInfo(activo);
+
+                if (info == null) {
+                        return ResponseEntity.noContent().build();
+                }
+
+                return ResponseEntity.ok(info);
         }
 
         @PutMapping("/{id}/activo")
@@ -778,8 +1278,6 @@ public class TabletController {
                                                 "device_name", tablet.getDeviceName()));
         }
 
-        
-
         @ExceptionHandler(GpsTrackingAlreadyActiveException.class)
         public ResponseEntity<?> gpsTrackingActivo(
                         GpsTrackingAlreadyActiveException e) {
@@ -789,6 +1287,313 @@ public class TabletController {
                                 .body(Map.of(
                                                 "error", "GPS_TRACKING_ALREADY_ACTIVE",
                                                 "message", e.getMessage()));
+        }
+
+        @PostMapping("/kiosk/{activo}")
+        public ResponseEntity<?> cambiarModoKiosco(
+                        @PathVariable String activo,
+                        @RequestBody Map<String, Boolean> body) {
+
+                Boolean enabled = body.get("enabled");
+
+                if (enabled == null) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "El campo enabled es obligatorio"));
+                }
+
+                Tablet tablet = tabletRepository.findByActivo(activo)
+                                .orElse(null);
+
+                if (tablet == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "Tablet no encontrada",
+                                                        "activo", activo));
+                }
+
+                String comando = enabled ? "kiosk_on" : "kiosk_off";
+
+                boolean confirmado = false;
+
+                try {
+
+                        String json = objectMapper.writeValueAsString(
+                                        Map.of(
+                                                        "pending_command", comando));
+
+                        confirmado = MdmSocketHandler.enviarOrdenConAck(
+                                        tablet.getId().toString(),
+                                        json,
+                                        comando);
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+
+                if (!confirmado) {
+
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "confirmed", false,
+                                                        "enabled", enabled,
+                                                        "activo", activo,
+                                                        "message",
+                                                        "La tablet no confirmó el cambio de modo kiosco"));
+                }
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "confirmed", true,
+                                                "enabled", enabled,
+                                                "activo", activo,
+                                                "message",
+                                                enabled
+                                                                ? "Modo kiosco activado"
+                                                                : "Modo kiosco desactivado"));
+        }
+
+        @PostMapping("/kiosk/all")
+        public ResponseEntity<?> cambiarModoKioscoMasivo(
+                        @RequestBody Map<String, Boolean> body) {
+
+                Boolean enabled = body.get("enabled");
+
+                if (enabled == null) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "El campo enabled es obligatorio"));
+                }
+
+                String comando = enabled
+                                ? "kiosk_on"
+                                : "kiosk_off";
+
+                List<Tablet> tablets = tabletRepository.findAll();
+
+                int total = tablets.size();
+
+                java.util.concurrent.atomic.AtomicInteger enviadas = new java.util.concurrent.atomic.AtomicInteger(0);
+
+                java.util.concurrent.atomic.AtomicInteger confirmadas = new java.util.concurrent.atomic.AtomicInteger(
+                                0);
+
+                java.util.concurrent.atomic.AtomicInteger noConfirmadas = new java.util.concurrent.atomic.AtomicInteger(
+                                0);
+
+                java.util.concurrent.atomic.AtomicInteger sinConexion = new java.util.concurrent.atomic.AtomicInteger(
+                                0);
+
+                java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(20);
+
+                List<java.util.concurrent.Future<?>> resultados = new java.util.ArrayList<>();
+
+                for (Tablet tablet : tablets) {
+
+                        String deviceId = tablet.getId().toString();
+
+                        if (!MdmSocketHandler.estaTabletConectada(deviceId)) {
+                                sinConexion.incrementAndGet();
+                                continue;
+                        }
+
+                        java.util.concurrent.Future<?> future = executor.submit(() -> {
+
+                                try {
+
+                                        enviadas.incrementAndGet();
+
+                                        String json = objectMapper.writeValueAsString(
+                                                        Map.of(
+                                                                        "pending_command",
+                                                                        comando));
+
+                                        boolean confirmado = MdmSocketHandler.enviarOrdenConAck(
+                                                        deviceId,
+                                                        json,
+                                                        comando);
+
+                                        if (confirmado) {
+                                                confirmadas.incrementAndGet();
+                                        } else {
+                                                noConfirmadas.incrementAndGet();
+                                        }
+
+                                } catch (Exception e) {
+
+                                        noConfirmadas.incrementAndGet();
+
+                                        System.err.println(
+                                                        "ERROR KIOSCO MASIVO | Tablet "
+                                                                        + deviceId
+                                                                        + " | "
+                                                                        + e.getMessage());
+                                }
+                        });
+
+                        resultados.add(future);
+                }
+
+                for (java.util.concurrent.Future<?> resultado : resultados) {
+
+                        try {
+                                resultado.get();
+                        } catch (Exception e) {
+                                System.err.println(
+                                                "ERROR esperando resultado de kiosco masivo: "
+                                                                + e.getMessage());
+                        }
+                }
+
+                executor.shutdown();
+
+                System.out.println(
+                                "KIOSCO MASIVO FINALIZADO"
+                                                + " | enabled=" + enabled
+                                                + " | total=" + total
+                                                + " | enviadas=" + enviadas.get()
+                                                + " | confirmadas=" + confirmadas.get()
+                                                + " | noConfirmadas=" + noConfirmadas.get()
+                                                + " | sinConexion=" + sinConexion.get());
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "enabled", enabled,
+                                                "command", comando,
+                                                "total", total,
+                                                "enviadas", enviadas.get(),
+                                                "confirmadas", confirmadas.get(),
+                                                "noConfirmadas", noConfirmadas.get(),
+                                                "sinConexion", sinConexion.get(),
+                                                "message",
+                                                enabled
+                                                                ? "Activación masiva de modo kiosco finalizada"
+                                                                : "Desactivación masiva de modo kiosco finalizada"));
+        }
+
+        @PutMapping("/bateria/{id}")
+        public ResponseEntity<?> actualizarEstadoBateria(
+                        @PathVariable Long id,
+                        @RequestBody Map<String, Object> datos) {
+
+                try {
+
+                        String estado = (String) datos.get("estado_bateria");
+
+                        Integer porcentaje = null;
+
+                        if (datos.get("porcentaje_inflado") != null) {
+                                porcentaje = Integer.valueOf(
+                                                datos.get("porcentaje_inflado").toString());
+                        }
+
+                        // ==============================
+                        // USUARIO
+                        // ==============================
+
+                        String usuarioLogin = (String) datos.get("usuario");
+
+                        if (usuarioLogin == null || usuarioLogin.isBlank()) {
+                                return ResponseEntity.badRequest()
+                                                .body("No se recibió el usuario.");
+                        }
+
+                        Usuario usuario = usuarioService.obtenerUsuarioActivo(usuarioLogin);
+
+                        // ==============================
+                        // GUARDAR VALORES ANTERIORES
+                        // ==============================
+
+                        Tablet tabletAnterior = tabletService.obtenerPorId(id);
+
+                        String estadoAnterior = tabletAnterior.getEstadoBateria() != null
+                                        ? tabletAnterior.getEstadoBateria()
+                                        : "NORMAL";
+
+                        Integer porcentajeAnterior = tabletAnterior.getPorcentajeInflado();
+
+                        // IMPORTANTE:
+                        // construir el texto ANTES de actualizar
+
+                        String valorAnterior = estadoAnterior;
+
+                        if ("INFLADA".equals(estadoAnterior)
+                                        && porcentajeAnterior != null) {
+
+                                valorAnterior = estadoAnterior + " " +
+                                                porcentajeAnterior + "%";
+                        }
+
+                        // ==============================
+                        // ACTUALIZAR BATERÍA
+                        // ==============================
+
+                        Tablet tablet = tabletService.actualizarEstadoBateria(
+                                        id,
+                                        estado,
+                                        porcentaje);
+
+                        // ==============================
+                        // NUEVO VALOR
+                        // ==============================
+
+                        String valorNuevo = tablet.getEstadoBateria();
+
+                        if ("INFLADA".equals(tablet.getEstadoBateria())
+                                        && tablet.getPorcentajeInflado() != null) {
+
+                                valorNuevo = tablet.getEstadoBateria() + " " +
+                                                tablet.getPorcentajeInflado() + "%";
+                        }
+
+                        // ==============================
+                        // AUDITORÍA
+                        // ==============================
+
+                        String detalle = valorAnterior + " → " + valorNuevo;
+
+                        auditoriaDispositivoService.registrar(
+                                        tablet.getActivo(),
+                                        "BATERIA",
+                                        usuario.getNombre(),
+                                        detalle);
+
+                        return ResponseEntity.ok(tablet);
+
+                } catch (IllegalArgumentException e) {
+
+                        return ResponseEntity.badRequest()
+                                        .body(e.getMessage());
+
+                } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        return ResponseEntity.internalServerError()
+                                        .body("Error actualizando estado de batería");
+                }
+        }
+
+        @GetMapping("/auditoria/{accion}/{activo}")
+        public ResponseEntity<?> obtenerAuditoria(
+                        @PathVariable String activo,
+                        @PathVariable String accion) {
+
+                AuditoriaDispositivo auditoria = auditoriaDispositivoService.obtener(
+                                activo,
+                                accion.toUpperCase());
+
+                if (auditoria == null) {
+                        return ResponseEntity.noContent().build();
+                }
+
+                return ResponseEntity.ok(auditoria);
         }
 
 }

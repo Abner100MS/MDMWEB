@@ -30,13 +30,13 @@ public class Tablet {
     @JsonProperty("model")
     private String model;
 
-    @Column(name = "codigo_emp")
-    @JsonProperty("codigo_emp")
-    private String codigoEmp;
+    @Column(name = "estado_bateria")
+    @JsonProperty("estado_bateria")
+    private String estadoBateria = "NORMAL";
 
-    @Column(name = "nombre_emp")
-    @JsonProperty("nombre_emp")
-    private String nombreEmp;
+    @Column(name = "porcentaje_inflado")
+    @JsonProperty("porcentaje_inflado")
+    private Integer porcentajeInflado;
 
     @Column(name = "battery_level")
     @JsonProperty("battery_level")
@@ -89,6 +89,29 @@ public class Tablet {
     @JsonProperty("os_version")
     private String osVersion;
 
+    @Column(name = "app_version")
+    @JsonProperty("app_version")
+    private String appVersion;
+
+    @Column(name = "imei")
+    @JsonProperty("imei")
+    private String imei;
+
+    @Column(name = "security_patch")
+    @JsonProperty("security_patch")
+    private String securityPatch;
+
+    @Column(name = "system_update_pending")
+    @JsonProperty("system_update_pending")
+    private Boolean systemUpdatePending = false;
+
+    @Column(name = "system_update_received_time")
+    @JsonProperty("system_update_received_time")
+    private Long systemUpdateReceivedTime;
+
+    @Column(name = "sin_respuesta")
+    private Boolean sinRespuesta = false;
+
     // --- CAMPOS PARA GESTIÓN MDM ---
 
     @Column(name = "apps_reportadas", columnDefinition = "TEXT")
@@ -115,32 +138,40 @@ public class Tablet {
     @JsonProperty("restricciones")
     private String restricciones;
 
+    // ESTADO DEL MODO KIOSCO
+    @Column(name = "modo_kiosco")
+    @JsonProperty("modo_kiosco")
+    private Boolean modoKiosco;
+
     @Column(name = "urls_permitidas", length = 2000)
     @JsonProperty("urls_permitidas")
     private String urlsPermitidas;
 
     @Column(name = "latitude")
+    @JsonProperty("latitude")
     private Double latitude;
 
     @Column(name = "longitude")
+    @JsonProperty("longitude")
     private Double longitude;
 
     @Column(name = "gps_timestamp")
     private LocalDateTime gpsTimestamp;
 
     @Column(name = "gps_accuracy")
+    @JsonProperty("gps_accuracy")
     private Double gpsAccuracy;
 
     @Column(name = "gps_source")
+    @JsonProperty("gps_source")
     private String gpsSource;
+
+    @Transient
+    @JsonProperty(value = "gps_timestamp", access = JsonProperty.Access.WRITE_ONLY)
+    private Long gpsTimestampMillis;
 
     @Column(name = "categoria")
     @JsonProperty("categoria")
     private String categoria;
 
-    @PrePersist
-    @PreUpdate
-    public void updateTimestamp() {
-        this.lastConnection = LocalDateTime.now();
-    }
 }

@@ -82,4 +82,32 @@ public class TareaProgramadaController {
 
     }
 
+    // ==========================================
+    // OPCIONES DE DESTINO PARA TAREAS
+    // ==========================================
+
+    @GetMapping("/opciones/plantas")
+    public List<String> obtenerPlantas() {
+
+        return tareaProgramadaService.obtenerPlantas();
+    }
+
+    @GetMapping("/opciones/categorias")
+    public List<String> obtenerCategorias() {
+
+        return tareaProgramadaService.obtenerCategorias();
+    }
+
+    @GetMapping("/opciones/departamentos")
+    public List<String> obtenerDepartamentos() {
+
+        return tareaProgramadaService.obtenerDepartamentos();
+    }
+
+    @GetMapping("/opciones/empleados")
+    public List<String> obtenerEmpleados() {
+
+        return tareaProgramadaService.obtenerEmpleados();
+    }
+
 }

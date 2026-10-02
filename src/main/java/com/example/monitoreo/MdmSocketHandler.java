@@ -392,10 +392,20 @@ public class MdmSocketHandler extends TextWebSocketHandler {
 
     private String obtenerDeviceIdPorSession(WebSocketSession session) {
 
-        for (Map.Entry<String, WebSocketSession> entry : sessions.entrySet()) {
-            if (entry.getValue().equals(session)) {
-                return entry.getKey();
+        try {
+
+            if (session != null && session.getUri() != null) {
+
+                String uri = session.getUri().toString();
+
+                return uri.substring(
+                        uri.lastIndexOf('/') + 1);
             }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "No se pudo obtener ID desde sesión WebSocket");
         }
 
         return "desconocido";
@@ -445,6 +455,20 @@ public class MdmSocketHandler extends TextWebSocketHandler {
         enviarOrden(deviceId, json);
     }
 
+    public static boolean verificarConexion(String deviceId) {
+
+        String json = """
+                {
+                    "command":"ping_mdm"
+                }
+                """;
+
+        return enviarOrdenConAck(
+                deviceId,
+                json,
+                "ping_mdm");
+    }
+
     public static Set<String> obtenerTabletsConectadas() {
         return sessions.keySet();
     }
@@ -458,6 +482,106 @@ public class MdmSocketHandler extends TextWebSocketHandler {
 
     public static boolean fueActualizacionEnviada(String deviceId) {
         return actualizacionesEnviadas.remove(deviceId) != null;
+    }
+
+    public static Map<String, Object> diagnosticarConexion(
+            String deviceId) {
+
+        Map<String, Object> resultado = new ConcurrentHashMap<>();
+
+        // ==========================================
+        // 1. VERIFICAR WEBSOCKET
+        // ==========================================
+
+        WebSocketSession session = sessions.get(deviceId);
+
+        boolean websocketConectado = session != null &&
+                session.isOpen();
+
+        resultado.put(
+                "webSocket",
+                websocketConectado);
+
+        if (!websocketConectado) {
+
+            resultado.put(
+                    "commandSent",
+                    false);
+
+            resultado.put(
+                    "ackReceived",
+                    false);
+
+            resultado.put(
+                    "latencyMs",
+                    -1);
+
+            resultado.put(
+                    "message",
+                    "WebSocket no conectado");
+
+            return resultado;
+        }
+
+        // ==========================================
+        // 2. CREAR PING
+        // ==========================================
+
+        String json = """
+                {
+                    "command":"ping_mdm"
+                }
+                """;
+
+        // ==========================================
+        // 3. MEDIR TIEMPO
+        // ==========================================
+
+        long inicio = System.currentTimeMillis();
+
+        resultado.put(
+                "commandSent",
+                true);
+
+        // ==========================================
+        // 4. ENVIAR PING Y ESPERAR ACK
+        // ==========================================
+
+        boolean ack = enviarOrdenConAck(
+                deviceId,
+                json,
+                "ping_mdm");
+
+        long fin = System.currentTimeMillis();
+
+        long latencia = fin - inicio;
+
+        // ==========================================
+        // 5. RESULTADO
+        // ==========================================
+
+        resultado.put(
+                "ackReceived",
+                ack);
+
+        resultado.put(
+                "latencyMs",
+                ack ? latencia : -1);
+
+        if (ack) {
+
+            resultado.put(
+                    "message",
+                    "Comunicación remota operativa");
+
+        } else {
+
+            resultado.put(
+                    "message",
+                    "WebSocket conectado pero la tablet no respondió al diagnóstico");
+        }
+
+        return resultado;
     }
 
 }

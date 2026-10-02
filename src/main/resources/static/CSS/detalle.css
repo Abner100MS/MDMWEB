@@ -1,0 +1,808 @@
+/* =========================================
+   AUDITORÍA - DETALLE DE BATERÍA
+   ========================================= */
+
+.detalle-auditoria-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e3e8ef;
+    border-radius: 12px;
+    padding: 16px 17px;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+
+.detalle-auditoria-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.detalle-auditoria-titulo {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #6c757d;
+
+    margin-bottom: 10px;
+}
+
+.detalle-auditoria-titulo i {
+    color: #0d6efd;
+    font-size: 13px;
+}
+
+.detalle-auditoria-usuario {
+    font-size: 14px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.detalle-auditoria-fecha {
+    font-size: 12px;
+    color: #8a939d;
+    margin-bottom: 9px;
+}
+
+/* Cambio realizado */
+.detalle-auditoria-detalle {
+    display: inline-block;
+
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    padding: 5px 9px;
+
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.auditoria-ultima {
+    border-left: 4px solid #0d6efd;
+}
+
+.auditoria-anterior {
+    border-left: 4px solid #0d6efd;
+    background: #fcfcfa;
+}
+
+
+/* =========================================
+   CONFIGURACIÓN DE BATERÍA
+   ========================================= */
+
+.bateria-config-card {
+    background: #ffffff;
+    border: 1px solid #e5e9ef;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+
+/* ENCABEZADO DE CADA CAMPO */
+
+.bateria-campo-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+}
+
+.bateria-campo-icono {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #eef5ff;
+    color: #53f877;
+
+    font-size: 15px;
+}
+
+.bateria-campo-titulo {
+    display: block;
+
+    font-size: 13px;
+    font-weight: 700;
+    color: #212529;
+
+    margin: 0;
+}
+
+.bateria-campo-subtitulo {
+    font-size: 11px;
+    color: #8a939d;
+    margin-top: 1px;
+}
+
+
+/* SELECT */
+
+.bateria-select {
+    height: 44px;
+
+    border: 1px solid #dce2e8;
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+.bateria-select:focus {
+    border-color: #86b7fe;
+
+    box-shadow:
+        0 0 0 3px rgba(13, 110, 253, 0.10);
+}
+
+.bateria-select:disabled {
+    background-color: #f3f5f7;
+    color: #8a939d;
+    cursor: not-allowed;
+}
+
+
+/* NOTA INFERIOR */
+
+.bateria-nota {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-top: 15px;
+    padding-top: 12px;
+
+    border-top: 1px solid #eef1f4;
+
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.bateria-nota i {
+    color: #53f877;
+    font-size: 13px;
+}
+
+
+/* =========================================
+   MODAL DETALLE - DISEÑO DISPOSITIVO
+   ========================================= */
+
+/* Modal un poco más amplio */
+#modalDetalle .modal-dialog {
+    max-width: 820px;
+    width: calc(100% - 40px);
+}
+
+/* Área principal del contenido */
+#modalDetalle .tab-content {
+    min-width: 0;
+    padding: 20px 22px !important;
+}
+
+#modalDetalle #detalle-dispositivo>.row {
+    margin-top: 8px !important;
+}
+
+/* Tarjetas principales */
+#modalDetalle .detalle-card {
+    background: #ffffff;
+    border: 1px solid #e3e8ef;
+    border-radius: 12px;
+    padding: 15px 16px;
+    height: 100%;
+}
+
+/* Título de tarjeta */
+#modalDetalle .detalle-card-titulo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+
+    font-size: 13px;
+    font-weight: 700;
+    color: #495057;
+}
+
+/* Cada dato */
+#modalDetalle .detalle-fila {
+    display: grid;
+    grid-template-columns: minmax(135px, 42%) minmax(0, 1fr);
+    gap: 12px;
+
+    align-items: start;
+
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f2f5;
+
+    font-size: 13px;
+}
+
+/* Quitar línea al último */
+#modalDetalle .detalle-fila:last-child {
+    border-bottom: none;
+}
+
+/* Nombre del campo */
+#modalDetalle .detalle-fila>span {
+    color: #070707;
+    font-weight: 600;
+}
+
+/* Valor */
+#modalDetalle .detalle-fila>strong {
+    color: #6c757d;
+    font-weight: 500;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* Estado general */
+#modalDetalle .detalle-estado-general {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    background: #f6fbf8;
+    border: 1px solid #dcefe3;
+    border-radius: 9px;
+
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+/* Icono estado */
+#modalDetalle .detalle-estado-general>i {
+    color: #198754;
+    font-size: 17px;
+    margin-top: 1px;
+}
+
+/* Título estado */
+#modalDetalle .detalle-estado-general strong {
+    display: block;
+    font-size: 13px;
+}
+
+/* Descripción estado */
+#modalDetalle .detalle-estado-general small {
+    display: block;
+    margin-top: 2px;
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* Cuando requiere atención */
+#modalDetalle .detalle-estado-general.estado-atencion {
+    background: #fff9e8;
+    border-color: #ffe08a;
+}
+
+#modalDetalle .detalle-estado-general.estado-atencion>i {
+    color: #d99b00;
+}
+
+/* Actualización pendiente */
+#modalDetalle .detalle-fila.actualizacion-pendiente {
+    background: #fff8df;
+    border-radius: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+#modalDetalle .detalle-fila.actualizacion-pendiente strong {
+    color: #b77900;
+}
+
+/* =========================================
+   DISTRIBUCIÓN DE TARJETAS
+   ========================================= */
+
+#modalDetalle #detalle-dispositivo>.row {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 8px !important;
+}
+
+#modalDetalle #detalle-dispositivo>.row>.col-lg-6 {
+    flex: 1 1 0;
+    width: 50%;
+    max-width: none;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 991.98px) {
+
+    #modalDetalle .modal-dialog {
+        width: calc(100% - 20px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #modalDetalle .detalle-card {
+        height: auto !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+
+    #modalDetalle .modal-body>.d-flex {
+        flex-direction: column;
+    }
+
+    #modalDetalle .nav-pills {
+        width: 100% !important;
+        min-height: auto !important;
+
+        flex-direction: row !important;
+
+        border-right: 0 !important;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    #modalDetalle .nav-pills .nav-link {
+        flex: 1;
+    }
+
+    #modalDetalle .tab-content {
+        min-width: 0;
+        padding-left: 22px !important;
+        padding-right: 22px !important;
+    }
+
+
+    #modalDetalle .detalle-fila {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    #modalDetalle .detalle-fila>strong {
+        text-align: left;
+    }
+
+    #modalDetalle #detalle-dispositivo>.row>.col-lg-6 {
+        width: 100%;
+        flex: 0 0 100%;
+    }
+}
+
+#modalDetalle #detalleActualizacion {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+#modalDetalle #detalleFilaActualizacion {
+    grid-template-columns: 105px 1fr;
+    gap: 3px;
+}
+
+/* =========================================
+   COLORES DE INFORMACIÓN DEL DISPOSITIVO
+   ========================================= */
+
+/* Datos de información general */
+#modalDetalle .col-lg-6:first-child .detalle-fila>strong {
+    color: #0d6efd;
+}
+
+/* Datos del sistema */
+#modalDetalle .col-lg-6:nth-child(2) .detalle-fila>strong {
+    color: #212529;
+}
+
+/* Actualización normal */
+#modalDetalle #detalleActualizacion {
+    color: #198754;
+}
+
+/* Actualización pendiente */
+#modalDetalle .actualizacion-pendiente #detalleActualizacion {
+    color: #b77900;
+}
+
+/* =========================================
+   DISPOSITIVO FUERA DE LÍNEA
+   ========================================= */
+
+#modalDetalle .detalle-estado-general.estado-offline {
+    background: #fff5f5;
+    border-color: #f83a3a;
+}
+
+#modalDetalle .detalle-estado-general.estado-offline>i {
+    color: #dc3545;
+}
+
+#modalDetalle .detalle-estado-general.estado-offline strong {
+    color: #dc3545;
+}
+
+
+
+
+/* =========================================================
+   DIAGNÓSTICO MDM
+   ========================================================= */
+
+#detalle-diagnostico {
+    animation: diagnosticoEntrada 0.2s ease;
+}
+
+@keyframes diagnosticoEntrada {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+#detalle-diagnostico h4 {
+    color: #212529;
+    font-size: 1.35rem;
+    margin-bottom: 14px !important;
+}
+
+
+/* =========================================================
+   TARJETA DIAGNÓSTICO
+   ========================================================= */
+
+#detalle-diagnostico .detalle-card {
+    background: #ffffff;
+    border: 1px solid #dee5ed;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   TÍTULO DE TARJETA
+   ========================================================= */
+
+#detalle-diagnostico .detalle-card-titulo {
+    padding: 9px 12px;
+
+    background: #f7f9fc;
+    border-bottom: 1px solid #e5e9ef;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #212529;
+
+    display: flex;
+    align-items: center;
+}
+
+#detalle-diagnostico .detalle-card-titulo i {
+    color: #0d6efd;
+    font-size: 0.9rem;
+}
+
+
+/* =========================================================
+   FILAS
+   ========================================================= */
+
+#detalle-diagnostico .detalle-fila {
+    min-height: 38px;
+
+    padding: 7px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border-bottom: 1px solid #edf0f3;
+}
+
+#detalle-diagnostico .detalle-fila:last-child {
+    border-bottom: none;
+}
+
+#detalle-diagnostico .detalle-fila>span:first-child {
+    color: #495057;
+    font-size: 0.8rem;
+}
+
+#detalle-diagnostico .detalle-fila strong {
+    font-size: 0.78rem;
+    text-align: right;
+}
+
+
+/* =========================================================
+   SIN COMPROBAR
+   ========================================================= */
+
+#diagnosticoWebSocket .text-muted,
+#diagnosticoComando .text-muted,
+#diagnosticoAck .text-muted {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 3px 8px;
+
+    background: #f1f3f5;
+
+    border-radius: 12px;
+
+    color: #6c757d !important;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   ESTADO OK
+   ========================================================= */
+
+#diagnosticoWebSocket .text-success,
+#diagnosticoComando .text-success,
+#diagnosticoAck .text-success {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 3px 8px;
+
+    background: #eaf7ef;
+
+    border-radius: 12px;
+
+    color: #198754 !important;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ESTADO ERROR
+   ========================================================= */
+
+#diagnosticoWebSocket .text-danger,
+#diagnosticoComando .text-danger,
+#diagnosticoAck .text-danger {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 3px 8px;
+
+    background: #fdecec;
+
+    border-radius: 12px;
+
+    color: #dc3545 !important;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   LATENCIA
+   ========================================================= */
+
+#diagnosticoLatencia .text-success {
+
+    display: inline-block;
+
+    padding: 3px 8px;
+
+    background: #eaf7ef;
+
+    border-radius: 12px;
+
+    color: #198754 !important;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+#diagnosticoLatencia .text-danger {
+
+    display: inline-block;
+
+    padding: 3px 8px;
+
+    background: #fdecec;
+
+    border-radius: 12px;
+
+    color: #dc3545 !important;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   RESULTADO GENERAL
+   ========================================================= */
+
+#diagnosticoResultado {
+
+    min-height: 48px;
+
+    padding: 8px 12px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 0.78rem;
+
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+}
+
+
+/* SIN EJECUTAR */
+
+#diagnosticoResultado.alert-secondary {
+    background: #f4f6f8;
+    color: #475467;
+    border-left: 3px solid #98a2b3;
+}
+
+
+/* EJECUTANDO */
+
+#diagnosticoResultado.alert-info {
+    background: #eef6ff;
+    color: #175cd3;
+    border-left: 3px solid #2e90fa;
+}
+
+
+/* CORRECTO */
+
+#diagnosticoResultado.alert-success {
+    background: #ecfdf3;
+    color: #067647;
+    border-left: 3px solid #12b76a;
+}
+
+
+/* ERROR */
+
+#diagnosticoResultado.alert-danger {
+    background: #fef3f2;
+    color: #b42318;
+    border-left: 3px solid #f04438;
+}
+
+
+/* =========================================================
+   TEXTO RESULTADO
+   ========================================================= */
+
+#diagnosticoResultadoIcono {
+    min-width: 22px;
+    font-size: 1rem !important;
+    text-align: center;
+}
+
+#diagnosticoResultadoTitulo {
+    display: block;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+
+    margin-bottom: 1px;
+}
+
+#diagnosticoResultadoMensaje {
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
+
+/* =========================================================
+   BOTÓN
+   ========================================================= */
+
+#btnEjecutarDiagnostico {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+
+    min-width: 160px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+#btnEjecutarDiagnostico:hover {
+    background-color: #157347;
+    border-color: #146c43;
+    color: white;
+}
+
+#btnEjecutarDiagnostico:hover:not(:disabled) {
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.18);
+}
+
+#btnEjecutarDiagnostico:disabled {
+    cursor: wait;
+}
+
+
+/* =========================================================
+   SPINNER
+   ========================================================= */
+
+#btnEjecutarDiagnostico .spinner-border {
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+}
+
+
+/* =========================================================
+   BOTÓN DEL MENÚ LATERAL
+   ========================================================= */
+
+button[data-bs-target="#detalle-diagnostico"] {
+    margin-top: 2px;
+}
+
+button[data-bs-target="#detalle-diagnostico"] i {
+    font-size: 0.9rem;
+}
+
+button[data-bs-target="#detalle-diagnostico"].active {
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    #detalle-diagnostico .detalle-fila {
+        gap: 8px;
+    }
+
+    #btnEjecutarDiagnostico {
+        width: 100%;
+    }
+}

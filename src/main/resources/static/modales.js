@@ -10,13 +10,8 @@ async function cargarModales() {
 
         const html = await respuesta.text();
 
-        console.log("HTML recibido:");
-        console.log(html);
-
         document.body.insertAdjacentHTML("beforeend", html);
 
-        console.log("Modal agregado al DOM:");
-        console.log(document.getElementById("modalHistorialCargador"));
 
     } catch (error) {
 
