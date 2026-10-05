@@ -1,0 +1,544 @@
+<!-- ============================================ -->
+<!-- VISTA DE STOCK                               -->
+<!-- ============================================ -->
+
+<div class="stock-container">
+
+    <!-- ENCABEZADO -->
+    <div class="stock-header">
+
+        <div>
+            <h4 class="stock-title">
+                <i class="bi bi-box-seam me-2"></i>
+                Stock de Dispositivos
+            </h4>
+
+            <p class="stock-subtitle">
+                Gestión de tablets almacenadas en bodega
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-sm" onclick="abrirIngresoStock()">
+
+            <i class="bi bi-plus-circle me-1"></i>
+            Ingresar a Stock
+
+        </button>
+
+    </div>
+
+
+    <!-- RESUMEN -->
+    <div class="row g-3 mb-2">
+
+        <!-- TOTAL EN STOCK -->
+        <div class="col-md-4">
+            <div class="stock-card">
+
+                <div class="stock-card-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <span class="stock-card-label">
+                        TOTAL EN STOCK
+                    </span>
+
+                    <h3 id="stockTotal">
+                        0
+                    </h3>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- REPORTANDO -->
+        <div class="col-md-4">
+            <div class="stock-card">
+
+                <div class="stock-card-icon">
+                    <i class="bi bi-wifi"></i>
+                </div>
+
+                <div>
+                    <span class="stock-card-label">
+                        STOCK REPORTANDO
+                    </span>
+
+                    <h3 id="stockReportando">
+                        0
+                    </h3>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- CON FALLA / REPARACIÓN -->
+        <div class="col-md-4">
+            <div class="stock-card">
+
+                <div class="stock-card-icon">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <div>
+                    <span class="stock-card-label">
+                        CON FALLA / REPARACIÓN
+                    </span>
+
+                    <h3 id="stockFalla">
+                        0
+                    </h3>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTROS -->
+    <div class="stock-filtros mb-2">
+
+        <div class="row g-2">
+
+            <!-- BUSCAR -->
+            <div class="col-md-5">
+
+                <div class="input-group">
+
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input type="text" id="buscarStock" class="form-control"
+                        placeholder="Buscar por activo, empleado, modelo...">
+
+                </div>
+
+            </div>
+
+
+            <!-- CONDICIÓN -->
+            <div class="col-md-3">
+
+                <select id="filtroCondicionStock" class="form-select">
+
+                    <option value="">
+                        Todas las condiciones
+                    </option>
+
+                    <option value="BUENO">
+                        Bueno
+                    </option>
+
+                    <option value="CON FALLA">
+                        Con falla
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLA -->
+    <div class="stock-tabla-container">
+
+        <table class="table align-middle stock-tabla">
+
+            <thead>
+
+                <tr>
+
+                    <th>ACTIVO</th>
+
+                    <th>EQUIPO / MODELO</th>
+
+                    <th>EMPLEADO</th>
+
+                    <th>ÁREA / DEPTO</th>
+
+                    <th>CONDICIÓN</th>
+
+                    <th>FECHA INGRESO</th>
+
+                    <th>ESTADO</th>
+
+                    <th class="text-center">
+                        ACCIONES
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="tablaStockBody">
+
+                <!--
+                    Los dispositivos serán cargados
+                    desde stock.js
+                -->
+
+                <tr id="stockSinDatos">
+
+                    <td colspan="8" class="text-center py-5 text-muted">
+
+                        <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
+
+                        No hay dispositivos en Stock
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="stock-paginacion">
+
+        <button type="button" id="btnStockAnterior" class="btn btn-sm btn-outline-secondary"
+            onclick="cambiarPaginaStock(-1)">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <span id="stockInfoPagina">
+            Página 1 de 1
+        </span>
+
+        <button type="button" id="btnStockSiguiente" class="btn btn-sm btn-outline-secondary"
+            onclick="cambiarPaginaStock(1)">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+        <span class="stock-separador-paginacion"></span>
+
+        <span>
+            Registros:
+            <strong id="stockTotalRegistros">0</strong>
+        </span>
+
+        <select id="stockRegistrosPorPagina" class="form-select form-select-sm" onchange="cambiarCantidadStock()">
+
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+
+        </select>
+
+    </div>
+
+</div>
+
+
+<!--Moddal De Ingreso -->
+
+<!-- ===================================================== -->
+<!-- MODAL INGRESAR A STOCK                                -->
+<!-- ===================================================== -->
+
+<div class="modal fade" id="modalIngresoStock" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+
+                <div>
+                    <h5 class="modal-title">
+                        <i class="bi bi-box-arrow-in-down me-2"></i>
+                        Ingresar dispositivo a Stock
+                    </h5>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+            <div class="modal-body stock-ingreso-body">
+
+                <!-- ================================================= -->
+                <!-- 1. BUSCAR ACTIVO                                  -->
+                <!-- ================================================= -->
+
+                <div class="stock-ingreso-bloque stock-bloque-busqueda">
+
+                    <div class="stock-ingreso-titulo">
+                        <div class="stock-ingreso-icono">
+                            <i class="bi bi-search"></i>
+                        </div>
+
+                        <div>
+                            <div class="stock-ingreso-titulo-principal">
+                                Buscar activo
+                            </div>
+
+                            <div class="stock-ingreso-titulo-secundario">
+                                Consulte el activo que será ingresado a bodega
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="input-group stock-input-busqueda">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-upc-scan"></i>
+                        </span>
+
+                        <input type="text" id="stockActivoBuscar" class="form-control" placeholder="Ej. 12029"
+                            autocomplete="off">
+
+                        <button type="button" class="btn btn-primary" onclick="buscarActivoParaStock()">
+
+                            <i class="bi bi-search me-1"></i>
+                            Buscar
+
+                        </button>
+
+                    </div>
+
+                    <div id="stockMensajeBusqueda" class="stock-mensaje-busqueda">
+
+                        Ingrese un número de activo para consultar su información.
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- 2. INFORMACIÓN DEL DISPOSITIVO                    -->
+                <!-- ================================================= -->
+
+                <div class="stock-ingreso-bloque">
+
+                    <div class="stock-ingreso-titulo">
+
+                        <div class="stock-ingreso-icono">
+                            <i class="bi bi-tablet"></i>
+                        </div>
+
+                        <div>
+                            <div class="stock-ingreso-titulo-principal">
+                                Información del dispositivo
+                            </div>
+
+                            <div class="stock-ingreso-titulo-secundario">
+                                Información obtenida automáticamente del activo
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div id="stockInformacionActivo" class="stock-info-grid stock-info-pendiente">
+
+                        <!-- ACTIVO -->
+                        <div class="stock-info-item">
+                            <span>Activo</span>
+
+                            <strong id="stockInfoActivo">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- EQUIPO -->
+                        <div class="stock-info-item">
+                            <span>Equipo</span>
+
+                            <strong id="stockInfoEquipo">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- MODELO -->
+                        <div class="stock-info-item">
+                            <span>Modelo</span>
+
+                            <strong id="stockInfoModelo">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- CÓDIGO -->
+                        <div class="stock-info-item">
+                            <span>Código</span>
+
+                            <strong id="stockInfoCodigo">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- EMPLEADO -->
+                        <div class="stock-info-item">
+                            <span>Empleado</span>
+
+                            <strong id="stockInfoEmpleado">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- PLANTA -->
+                        <div class="stock-info-item">
+                            <span>Planta</span>
+
+                            <strong id="stockInfoPlanta">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- ÁREA -->
+                        <div class="stock-info-item">
+                            <span>Área</span>
+
+                            <strong id="stockInfoArea">
+                                ---
+                            </strong>
+                        </div>
+
+
+                        <!-- DEPARTAMENTO -->
+                        <div class="stock-info-item">
+                            <span>Departamento</span>
+
+                            <strong id="stockInfoDepartamento">
+                                ---
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- 3. DATOS DE INGRESO                               -->
+                <!-- ================================================= -->
+
+                <div class="stock-ingreso-bloque">
+
+                    <div class="stock-ingreso-titulo">
+
+                        <div class="stock-ingreso-icono">
+                            <i class="bi bi-box-arrow-in-down"></i>
+                        </div>
+
+                        <div>
+                            <div class="stock-ingreso-titulo-principal">
+                                Datos de ingreso
+                            </div>
+
+                            <div class="stock-ingreso-titulo-secundario">
+                                Complete la información administrativa del ingreso
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row g-3">
+
+                        <!-- CONDICIÓN -->
+                        <div class="col-md-5">
+
+                            <label class="form-label stock-form-label">
+                                Condición
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select id="stockCondicionIngreso" class="form-select" disabled>
+
+                                <option value="BUENO">
+                                    Bueno
+                                </option>
+
+                                <option value="CON FALLA">
+                                    Con falla
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- MOTIVO -->
+                        <div class="col-md-7">
+
+                            <label class="form-label stock-form-label">
+                                Motivo de ingreso
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input type="text" id="stockMotivoIngreso" class="form-control"
+                                placeholder="Ej. Equipo disponible para reasignación" disabled>
+
+                        </div>
+
+
+                        <!-- OBSERVACIÓN -->
+                        <div class="col-12">
+
+                            <label class="form-label stock-form-label">
+                                Observación
+                            </label>
+
+                            <textarea id="stockObservacionIngreso" class="form-control" rows="3"
+                                placeholder="Agregue información adicional sobre el estado del equipo..."
+                                disabled></textarea>
+
+                            <div class="stock-observacion-ayuda">
+                                Si selecciona "Con falla", puede detallar aquí el problema del equipo.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button" id="btnConfirmarIngresoStock" class="btn btn-primary"
+                    onclick="guardarIngresoStock()" disabled>
+
+                    <i class="bi bi-box-arrow-in-down me-1"></i>
+                    Ingresar a Stock
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

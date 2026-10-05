@@ -1,0 +1,673 @@
+/* =========================================================
+   STOCK - CONTENEDOR PRINCIPAL
+========================================================= */
+
+.stock-container {
+    width: 100%;
+    padding: 6px 0 20px 0;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.stock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.stock-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #172033;
+}
+
+.stock-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 0.78rem;
+    color: #6c757d;
+}
+
+
+/* =========================================================
+   TARJETAS RESUMEN
+========================================================= */
+
+.stock-card {
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 7px 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e4e9f0;
+    border-radius: 7px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stock-card-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #eef5ff;
+    color: #0d6efd;
+
+    font-size: 1.15rem;
+}
+
+.stock-card-label {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 0.68rem;
+    font-weight: 600;
+
+    color: #626b78;
+
+    text-transform: uppercase;
+}
+
+.stock-card h3 {
+    margin: 0;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+
+    color: #172033;
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.stock-filtros {
+    padding: 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e7ed;
+    border-radius: 8px;
+}
+
+.stock-filtros .form-control,
+.stock-filtros .form-select,
+.stock-filtros .input-group-text {
+    min-height: 35px;
+
+    font-size: 0.76rem;
+
+    border-color: #d9e0e8;
+}
+
+.stock-filtros .input-group-text {
+    background: #f7f9fb;
+    color: #6c757d;
+}
+
+.stock-filtros .form-control:focus,
+.stock-filtros .form-select:focus {
+    border-color: #0d6efd;
+
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.10);
+}
+
+
+/* =========================================================
+   TABLA STOCK
+========================================================= */
+
+.stock-tabla-container {
+    background: #ffffff;
+    border: 1px solid #dfe5ec;
+    border-radius: 8px 8px 0 0;
+
+    height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.stock-tabla-container table {
+    width: auto;
+    min-width: 100%;
+    margin-bottom: 0;
+    table-layout: auto;
+}
+
+.stock-tabla-container th,
+.stock-tabla-container td {
+    width: auto;
+    white-space: nowrap;
+}
+
+.stock-tabla-container th:not(:last-child),
+.stock-tabla-container td:not(:last-child) {
+    padding-right: 14px;
+}
+
+.stock-tabla-container th:last-child,
+.stock-tabla-container td:last-child {
+    width: 1px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.stock-tabla-container thead th {
+    padding: 7px 6px;
+
+    background: #edf2f7;
+
+    border-bottom: 1px solid #dce3eb;
+
+    font-size: 0.66rem;
+    font-weight: 700;
+
+    color: #34445a;
+
+    vertical-align: middle;
+    white-space: nowrap;
+
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.stock-tabla-container tbody td {
+    padding: 7px 6px;
+
+    border-bottom: 1px solid #edf0f4;
+
+    font-size: 0.76rem;
+
+    color: #303846;
+
+    vertical-align: middle;
+}
+
+.stock-tabla-container tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.stock-tabla-container tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+/* =========================================================
+   ACTIVO
+========================================================= */
+
+.stock-tabla-container td:first-child .badge {
+    padding: 7px 10px;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    border-radius: 6px;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.stock-tabla-container .badge {
+    font-size: 0.64rem;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   BOTÓN GESTIONAR
+========================================================= */
+
+.stock-tabla-container .btn-outline-primary {
+    padding: 5px 9px;
+
+    font-size: 0.7rem;
+    font-weight: 600;
+
+    border-radius: 6px;
+}
+
+.stock-tabla-container .btn-outline-primary i {
+    margin-right: 3px;
+}
+
+
+/* =========================================================
+   SIN DATOS
+========================================================= */
+
+#stockSinDatos td {
+    height: 180px;
+}
+
+#stockSinDatos i {
+    color: #aab3be;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 992px) {
+
+    .stock-card {
+        min-height: 78px;
+    }
+
+    .stock-tabla-container {
+        overflow-x: auto;
+    }
+
+    .stock-tabla-container table {
+        min-width: 950px;
+    }
+}
+
+
+
+
+
+
+
+
+/* =========================================================
+   MODAL - INGRESO A STOCK
+   DISEÑO COMPACTO
+========================================================= */
+
+#modalIngresoStock .modal-dialog {
+    max-width: 600px;
+    width: calc(100% - 30px);
+}
+
+#modalIngresoStock .modal-content {
+    border: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+
+/* HEADER */
+
+#modalIngresoStock .modal-header {
+    padding: 12px 16px;
+}
+
+#modalIngresoStock .modal-title {
+    font-size: 0.95rem;
+}
+
+#modalIngresoStock .modal-header small {
+    font-size: 0.68rem;
+}
+
+
+/* BODY */
+
+.stock-ingreso-body {
+    padding: 9px 11px;
+    background: #f7f9fc;
+}
+
+
+/* =========================================================
+   BLOQUES
+========================================================= */
+
+.stock-ingreso-bloque {
+    background: #ffffff;
+
+    border: 1px solid #e3e8ef;
+    border-radius: 8px;
+
+    padding: 8px 10px;
+
+    margin-bottom: 7px;
+}
+
+.stock-ingreso-bloque:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   TÍTULOS
+========================================================= */
+
+.stock-ingreso-titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+}
+
+.stock-ingreso-icono {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 6px;
+
+    background: #eef4ff;
+    color: #0d6efd;
+
+    font-size: 0.75rem;
+}
+
+.stock-ingreso-titulo-principal {
+    color: #1e293b;
+
+    font-size: 0.73rem;
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+.stock-ingreso-titulo-secundario {
+    margin-top: 1px;
+
+    color: #7b8797;
+
+    font-size: 0.59rem;
+
+    line-height: 1.2;
+}
+
+
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+.stock-input-busqueda .form-control,
+.stock-input-busqueda .input-group-text,
+.stock-input-busqueda .btn {
+    min-height: 34px;
+    height: 34px;
+
+    font-size: 0.72rem;
+}
+
+.stock-input-busqueda .input-group-text {
+    background: #ffffff;
+    color: #64748b;
+
+    border-right: 0;
+}
+
+.stock-input-busqueda .form-control {
+    border-left: 0;
+}
+
+.stock-input-busqueda .form-control:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+.stock-mensaje-busqueda {
+    margin-top: 4px;
+
+    color: #778395;
+
+    font-size: 0.62rem;
+}
+
+.stock-mensaje-ok {
+    color: #198754;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DEL ACTIVO
+========================================================= */
+
+.stock-info-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 7px;
+}
+
+.stock-info-item {
+    min-height: 38px;
+
+    padding: 4px 7px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5eaf0;
+    border-radius: 6px;
+}
+
+.stock-info-item span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #8993a1;
+
+    font-size: 0.53rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.stock-info-item strong {
+    display: block;
+
+    color: #263244;
+
+    font-size: 0.65rem;
+    font-weight: 600;
+
+    line-height: 1.25;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stock-info-pendiente {
+    opacity: 0.48;
+}
+
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+.stock-form-label {
+    margin-bottom: 4px;
+
+    color: #344054;
+
+    font-size: 0.64rem;
+    font-weight: 700;
+}
+
+#modalIngresoStock .form-control,
+#modalIngresoStock .form-select {
+    min-height: 34px;
+
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    font-size: 0.7rem;
+}
+
+#modalIngresoStock textarea.form-control {
+    min-height: 38px;
+    height: 38px;
+    resize: vertical;
+}
+
+.stock-observacion-ayuda {
+    margin-top: 3px;
+
+    color: #8a94a3;
+
+    font-size: 0.56rem;
+}
+
+
+/* DESHABILITADOS */
+
+#modalIngresoStock .form-control:disabled,
+#modalIngresoStock .form-select:disabled {
+    background: #f1f3f6;
+
+    color: #9ba4b0;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+#modalIngresoStock .modal-footer {
+    padding: 9px 14px;
+}
+
+#modalIngresoStock .modal-footer .btn {
+    padding: 6px 12px;
+
+    font-size: 0.7rem;
+}
+
+
+/* =========================================================
+   PANTALLAS MEDIANAS / PEQUEÑAS
+========================================================= */
+
+@media (max-width: 768px) {
+
+    #modalIngresoStock .modal-dialog {
+        width: calc(100% - 20px);
+        max-width: 650px;
+
+        margin: 10px auto;
+    }
+
+    .stock-ingreso-body {
+        padding: 10px;
+    }
+
+    .stock-ingreso-bloque {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 8px;
+        padding: 7px 10px;
+        margin-bottom: 6px;
+    }
+
+    .stock-info-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 5px;
+    }
+
+    .stock-info-item {
+        min-height: 44px;
+        padding: 6px 7px;
+    }
+
+}
+
+
+/* =========================================================
+   CELULARES / PANTALLAS MUY ANGOSTAS
+========================================================= */
+
+@media (max-width: 550px) {
+
+    #modalIngresoStock .modal-dialog {
+        width: calc(100% - 12px);
+
+        margin: 6px auto;
+    }
+
+    .stock-info-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+#modalIngresoStock .row.g-3 {
+    --bs-gutter-y: 6px;
+}
+
+
+/* =========================================================
+   PAGINACIÓN STOCK
+========================================================= */
+
+.stock-paginacion {
+    min-height: 42px;
+    padding: 6px 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+
+    background: #ffffff;
+
+    border: 1px solid #dfe5ec;
+    border-top: 0;
+
+    border-radius: 0 0 8px 8px;
+
+    font-size: 0.75rem;
+}
+
+.stock-paginacion .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+}
+
+.stock-paginacion .form-select {
+    width: 68px;
+    height: 30px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    font-size: 0.75rem;
+}
+
+.stock-separador-paginacion {
+    height: 22px;
+    border-left: 1px solid #ced4da;
+}
