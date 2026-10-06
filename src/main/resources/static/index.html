@@ -2901,6 +2901,10 @@
                         mostrarVistaTareas();
                         break;
 
+                    case "stock":
+                        mostrarVistaStock();
+                        break;
+
                     default:
                         mostrarDashboard();
 
@@ -4226,12 +4230,19 @@
                                             <i class="bi bi-eye"></i>
                                         </button>
 
-                                        <!-- ELIMINAR -->
+                                        <!-- ENVIAR A STOCK -->
+                                        <button class="btn btn-xs btn-outline-dark w-100"
+                                                title="Enviar a Stock"
+                                                onclick="abrirModalEnviarStock('${t.activo}')">
+                                            <i class="bi bi-box-arrow-in-down"></i>
+                                        </button>
+
+                                        <!-- ELIMINAR 
                                         <button class="btn btn-xs btn-outline-dark w-100"
                                                 title="Eliminar"
                                                 onclick="eliminarTablet(${t.id})">
                                             <i class="bi bi-trash"></i>
-                                        </button>
+                                        </button> -->
 
                                     </div>
 

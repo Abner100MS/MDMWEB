@@ -140,9 +140,12 @@
     border: 1px solid #dfe5ec;
     border-radius: 8px 8px 0 0;
 
-    height: 260px;
+    min-height: 260px;
+    max-height: calc(100vh - 390px);
+
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
+
 }
 
 .stock-tabla-container table {
@@ -670,4 +673,475 @@
 .stock-separador-paginacion {
     height: 22px;
     border-left: 1px solid #ced4da;
+}
+
+/*Mesaje para Liberar*/
+
+/* =========================================================
+   MODAL LIBERAR STOCK
+========================================================= */
+
+.stock-modal-liberar {
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.16);
+}
+
+.stock-modal-liberar .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid #edf0f4;
+}
+
+.stock-modal-liberar .modal-title {
+    margin: 0;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #263445;
+}
+
+.stock-modal-liberar .modal-header small {
+    font-size: 0.70rem;
+}
+
+.stock-modal-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    font-size: 1rem;
+}
+
+.stock-modal-icon-liberar {
+    background: #e8f7ee;
+    color: #198754;
+}
+
+.stock-modal-liberar .modal-body {
+    padding: 16px;
+
+    font-size: 0.82rem;
+    color: #3d4856;
+}
+
+.stock-aviso-liberar {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-top: 12px;
+    padding: 10px 12px;
+
+    background: #f4f7fa;
+    border: 1px solid #e1e7ed;
+    border-radius: 7px;
+
+    font-size: 0.74rem;
+    color: #5a6573;
+}
+
+.stock-aviso-liberar i {
+    margin-top: 1px;
+    color: #54708c;
+}
+
+.stock-modal-liberar .modal-footer {
+    padding: 10px 16px;
+
+    border-top: 1px solid #edf0f4;
+}
+
+
+
+/* =========================================================
+   MENSAJE MODAL LIBERAR
+========================================================= */
+
+.stock-mensaje-liberar {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-top: 10px;
+    padding: 10px 12px;
+
+    border-radius: 7px;
+
+    font-size: 0.74rem;
+    line-height: 1.4;
+}
+
+.stock-mensaje-liberar.error {
+    background: #fff2f2;
+    border: 1px solid #f1c6c6;
+    color: #b42318;
+}
+
+.stock-mensaje-liberar.error i {
+    margin-top: 2px;
+    color: #dc3545;
+}
+
+
+/* =========================================================
+   MODAL EDITAR STOCK
+========================================================= */
+
+.stock-modal-editar {
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.16);
+}
+
+.stock-modal-editar .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid #edf0f4;
+}
+
+.stock-modal-editar .modal-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #263445;
+}
+
+.stock-modal-editar .modal-header small {
+    font-size: 0.70rem;
+}
+
+.stock-modal-icon-editar {
+    background: #eaf2ff;
+    color: #0d6efd;
+}
+
+.stock-modal-editar .modal-body {
+    padding: 16px;
+}
+
+.stock-modal-editar .form-label {
+    margin-bottom: 5px;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #445166;
+}
+
+.stock-editar-activo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 14px;
+    padding: 9px 11px;
+
+    background: #f5f7fa;
+    border: 1px solid #e1e6ec;
+    border-radius: 7px;
+
+    font-size: 0.78rem;
+}
+
+.stock-editar-activo strong {
+    color: #0d6efd;
+}
+
+.stock-modal-editar textarea {
+    resize: vertical;
+    min-height: 75px;
+    max-height: 140px;
+}
+
+.stock-modal-editar .modal-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #edf0f4;
+}
+
+
+/* MENSAJE EDITAR */
+
+.stock-mensaje-editar {
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-top: 12px;
+    padding: 9px 11px;
+
+    border-radius: 7px;
+
+    font-size: 0.74rem;
+}
+
+.stock-mensaje-editar.error {
+    display: flex;
+
+    background: #fff2f2;
+    border: 1px solid #f1c6c6;
+    color: #b42318;
+}
+
+.stock-mensaje-editar.success {
+    display: flex;
+
+    background: #edf9f1;
+    border: 1px solid #bfe4ca;
+    color: #16713a;
+}
+
+.stock-motivo-actual {
+    width: 180px;
+    max-width: 180px;
+
+    white-space: normal;
+    overflow: hidden;
+
+    line-height: 1.25;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+    overflow-wrap: break-word;
+
+    font-size: 0.76rem;
+}
+
+.stock-tabla-container td:has(.stock-motivo-actual) {
+    white-space: normal;
+}
+
+
+/* =========================================================
+   MODAL ELIMINAR / BAJA DEFINITIVA
+========================================================= */
+
+.stock-modal-eliminar {
+    border: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+/* HEADER */
+.stock-modal-eliminar .modal-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ICONO */
+.stock-modal-icon-eliminar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #fff1f2;
+    color: #dc3545;
+
+    font-size: 1.15rem;
+}
+
+.stock-modal-eliminar .modal-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.stock-modal-eliminar .modal-header small {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.76rem;
+}
+
+
+/* BODY */
+.stock-modal-eliminar .modal-body {
+    padding: 20px;
+}
+
+
+/* ACTIVO */
+.stock-eliminar-activo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 11px 14px;
+    margin-bottom: 14px;
+
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+}
+
+.stock-eliminar-activo span {
+    font-size: 0.78rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.stock-eliminar-activo strong {
+    font-size: 0.9rem;
+    color: #212529;
+}
+
+
+/* ADVERTENCIA */
+.stock-aviso-eliminar {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+
+    padding: 13px 14px;
+
+    background: #fff5f5;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+
+    color: #842029;
+}
+
+.stock-aviso-eliminar>i {
+    font-size: 1.1rem;
+    margin-top: 1px;
+    color: #dc3545;
+}
+
+.stock-aviso-eliminar strong {
+    display: block;
+    margin-bottom: 3px;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.stock-aviso-eliminar div div {
+    font-size: 0.76rem;
+    line-height: 1.4;
+}
+
+
+/* LABEL MOTIVO */
+.stock-modal-eliminar .form-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #343a40;
+}
+
+
+/* TEXTAREA */
+#eliminarStockMotivo {
+    min-height: 90px;
+    resize: vertical;
+
+    border-radius: 7px;
+
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+#eliminarStockMotivo:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+}
+
+
+/* TEXTO DE AYUDA */
+#eliminarStockMotivo+small {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.7rem;
+}
+
+
+/* MENSAJE DE ERROR */
+.stock-mensaje-eliminar {
+    margin-top: 12px;
+
+    padding: 9px 11px;
+
+    background: #fff1f2;
+    border: 1px solid #f5c2c7;
+    border-radius: 7px;
+
+    color: #842029;
+
+    font-size: 0.76rem;
+}
+
+
+/* FOOTER */
+.stock-modal-eliminar .modal-footer {
+    padding: 12px 20px;
+
+    background: #fafafa;
+    border-top: 1px solid #e9ecef;
+
+    gap: 8px;
+}
+
+.stock-modal-eliminar .modal-footer .btn {
+    min-width: 100px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+
+/* BOTÓN DAR DE BAJA */
+#btnConfirmarEliminarStock {
+    box-shadow: none;
+}
+
+#btnConfirmarEliminarStock:hover {
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   FILA SELECCIONADA - STOCK
+========================================================= */
+
+.stock-tabla-container tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.stock-tabla-container tbody tr:hover td {
+    background-color: #f5f8ff;
+}
+
+.stock-tabla-container tbody tr.stock-fila-seleccionada td {
+    background-color: #e8f1ff !important;
+}
+
+.stock-tabla-container tbody tr.stock-fila-seleccionada td:first-child .badge,
+.stock-tabla-container tbody tr.stock-fila-seleccionada td:first-child span {
+    background-color: #0b5ed7 !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.18);
+    transform: scale(1.05);
 }

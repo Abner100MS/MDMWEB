@@ -399,7 +399,19 @@ public interface TabletRepository extends JpaRepository<Tablet, Long> {
             ) AS bateriasInfladas
 
             FROM "monitoreo tablet".dispositivos d
-                                                            """, nativeQuery = true)
+
+            WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM "monitoreo tablet".stock s
+                WHERE TRIM(s.activo) = TRIM(d.activo)
+            )
+            OR (
+                d.last_connection >= NOW() - INTERVAL '17 minutes'
+                AND COALESCE(d.sin_respuesta, false) = false
+            )
+
+            """, nativeQuery = true)
     Object obtenerDashboardResumen();
 
     @Query(value = """

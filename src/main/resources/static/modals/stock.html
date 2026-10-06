@@ -105,7 +105,7 @@
         <div class="row g-2">
 
             <!-- BUSCAR -->
-            <div class="col-md-5">
+            <div class="col-md-2">
 
                 <div class="input-group">
 
@@ -122,12 +122,12 @@
 
 
             <!-- CONDICIÓN -->
-            <div class="col-md-3">
+            <div class="col-md-2">
 
                 <select id="filtroCondicionStock" class="form-select">
 
                     <option value="">
-                        Todas las condiciones
+                        Filtros
                     </option>
 
                     <option value="BUENO">
@@ -137,6 +137,8 @@
                     <option value="CON FALLA">
                         Con falla
                     </option>
+
+                    <option value="REPORTANDO">Reportando</option>
 
                 </select>
 
@@ -158,13 +160,19 @@
 
                     <th>ACTIVO</th>
 
-                    <th>EQUIPO / MODELO</th>
+                    <th>EQUIPO</th>
+
+                    <th>MODELO</th>
+
+                    <th>CÓDIGO</th>
 
                     <th>EMPLEADO</th>
 
                     <th>ÁREA / DEPTO</th>
 
                     <th>CONDICIÓN</th>
+
+                    <th>MOTIVO</th>
 
                     <th>FECHA INGRESO</th>
 
@@ -542,3 +550,417 @@
     </div>
 
 </div>
+
+<!-- Alertas de Mesaje para Liberar -->
+
+<!-- =====================================================
+     MODAL LIBERAR DE STOCK
+===================================================== -->
+<div class="modal fade" id="modalLiberarStock" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+
+        <div class="modal-content stock-modal-liberar">
+
+            <div class="modal-header">
+
+                <div class="stock-modal-icon stock-modal-icon-liberar">
+                    <i class="bi bi-box-arrow-up"></i>
+                </div>
+
+                <div>
+                    <h5 class="modal-title">
+                        Liberar de Stock
+                    </h5>
+
+                    <small class="text-muted">
+                        Regresar dispositivo a Producción
+                    </small>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    ¿Deseas liberar el activo
+                    <strong id="activoLiberarStock">---</strong>?
+                </p>
+
+                <div class="stock-aviso-liberar">
+                    <i class="bi bi-info-circle"></i>
+
+                    <span>
+                        El dispositivo saldrá de Stock y volverá
+                        a Producción.
+                    </span>
+                </div>
+
+                <div id="mensajeLiberarStock" class="stock-mensaje-liberar" style="display: none;">
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button" id="btnConfirmarLiberarStock" class="btn btn-sm btn-success"
+                    onclick="confirmarLiberacionStock()">
+
+                    <i class="bi bi-box-arrow-up me-1"></i>
+                    Liberar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MODAL EDITAR STOCK
+===================================================== -->
+<div class="modal fade" id="modalEditarStock" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content stock-modal-editar">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+
+                <div class="stock-modal-icon stock-modal-icon-editar">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+
+                <div>
+                    <h5 class="modal-title">
+                        Editar equipo en Stock
+                    </h5>
+
+                    <small class="text-muted">
+                        Actualizar condición y observación
+                    </small>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- ACTIVO -->
+                <div class="stock-editar-activo">
+
+                    <span>Activo</span>
+
+                    <strong id="editarStockActivo">
+                        ---
+                    </strong>
+
+                </div>
+
+
+                <!-- CONDICIÓN -->
+                <div class="mb-3">
+
+                    <label for="editarStockCondicion" class="form-label">
+
+                        Condición
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+                    <select id="editarStockCondicion" class="form-select form-select-sm">
+
+                        <option value="BUENO">
+                            Bueno
+                        </option>
+
+                        <option value="CON FALLA">
+                            Con falla
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- MOTIVO DEL CAMBIO -->
+                <div>
+
+                    <label for="editarStockMotivo" class="form-label">
+
+                        Motivo del cambio
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+                    <textarea id="editarStockMotivo" class="form-control form-control-sm" rows="3" maxlength="500"
+                        required></textarea>
+
+                    <small class="text-muted">
+                        Indique el motivo por el cual se está realizando este cambio.
+                    </small>
+
+                </div>
+
+                <!-- MENSAJE -->
+                <div id="mensajeEditarStock" class="stock-mensaje-editar" style="display: none;">
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+                <button type="button" id="btnGuardarEditarStock" class="btn btn-primary"
+                    onclick="guardarEdicionStock()">
+
+                    <i class="bi bi-check-lg me-1"></i>
+                    Guardar cambios
+
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL ELIMINAR / BAJA DEFINITIVA
+===================================================== -->
+
+<div class="modal fade" id="modalEliminarStock" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content stock-modal-eliminar">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+
+                <div class="stock-modal-icon stock-modal-icon-eliminar">
+                    <i class="bi bi-trash3"></i>
+                </div>
+
+                <div>
+                    <h5 class="modal-title">
+                        Dar de baja equipo
+                    </h5>
+
+                    <small class="text-muted">
+                        Eliminación definitiva del dispositivo
+                    </small>
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- ACTIVO -->
+                <div class="stock-eliminar-activo">
+
+                    <span>Activo</span>
+
+                    <strong id="eliminarStockActivo">
+                        ---
+                    </strong>
+
+                </div>
+
+
+                <!-- ADVERTENCIA -->
+                <div class="stock-aviso-eliminar">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                    <div>
+                        <strong>Esta acción es definitiva.</strong>
+
+                        <div>
+                            El equipo será eliminado de Stock y también
+                            de Dispositivos si se encuentra registrado en el MDM.
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- MOTIVO -->
+                <div class="mt-3">
+
+                    <label for="eliminarStockMotivo" class="form-label">
+
+                        Motivo de la baja
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+                    <textarea id="eliminarStockMotivo" class="form-control form-control-sm" rows="3" maxlength="500"
+                        placeholder="Ej. Equipo dañado sin posibilidad de reparación." required></textarea>
+
+                    <small class="text-muted">
+                        Este motivo quedará registrado en el historial.
+                    </small>
+
+                </div>
+
+
+                <!-- MENSAJE -->
+                <div id="mensajeEliminarStock" class="stock-mensaje-eliminar" style="display: none;">
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+
+                    Cancelar
+
+                </button>
+
+                <button type="button" id="btnConfirmarEliminarStock" class="btn btn-sm btn-danger"
+                    onclick="confirmarEliminarStock()">
+
+                    <i class="bi bi-trash3 me-1"></i>
+
+                    Dar de baja
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+     MODAL - ENVIAR DISPOSITIVO A STOCK
+========================================================= -->
+    <div class="modal fade" id="modalEnviarStockDispositivo" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <div>
+                        <h5 class="modal-title">
+                            <i class="bi bi-box-arrow-in-down me-2"></i>
+                            Enviar a Stock
+                        </h5>
+
+                        <small class="text-muted">
+                            Registrar dispositivo en bodega
+                        </small>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- ACTIVO -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Activo
+                        </label>
+
+                        <input type="text" id="dispositivoStockActivo" class="form-control" readonly>
+                    </div>
+
+                    <!-- CONDICIÓN -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Condición
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select id="dispositivoStockCondicion" class="form-select">
+
+                            <option value="BUENO">
+                                Bueno
+                            </option>
+
+                            <option value="CON FALLA">
+                                Con falla
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <!-- MOTIVO -->
+                    <div class="mb-2">
+                        <label class="form-label">
+                            Motivo de ingreso
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <textarea id="dispositivoStockMotivo" class="form-control" rows="3" maxlength="500"
+                            placeholder="Ej. Equipo disponible para reasignación"></textarea>
+                    </div>
+
+                    <!-- MENSAJE -->
+                    <div id="mensajeEnviarStockDispositivo" class="alert alert-danger mt-3 mb-0" style="display:none;">
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="button" id="btnEnviarDispositivoStock" class="btn btn-primary"
+                        onclick="confirmarEnviarDispositivoStock()">
+
+                        <i class="bi bi-box-arrow-in-down me-1"></i>
+                        Enviar a Stock
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>

@@ -82,6 +82,123 @@ async function mostrarVistaStock() {
 }
 
 
+async function abrirModalEnviarStock(activo) {
+
+    let modalElemento =
+        document.getElementById("modalEnviarStockDispositivo");
+
+
+    // =====================================================
+    // SI stock.html TODAVÍA NO ESTÁ CARGADO
+    // =====================================================
+
+    if (!modalElemento) {
+
+        const contenedor =
+            document.getElementById("vista-stock");
+
+        if (!contenedor) {
+            console.error("No existe el contenedor vista-stock");
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch("/modals/stock.html");
+
+            if (!response.ok) {
+                throw new Error("No se pudo cargar stock.html");
+            }
+
+            contenedor.innerHTML =
+                await response.text();
+
+            contenedor.dataset.cargado =
+                "true";
+
+            // Inicializar Stock
+            if (typeof iniciarStock === "function") {
+                iniciarStock();
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Error cargando modal de Stock:",
+                error
+            );
+
+            return;
+        }
+
+
+        // Ahora el modal ya debe existir
+        modalElemento =
+            document.getElementById(
+                "modalEnviarStockDispositivo"
+            );
+
+    }
+
+
+    if (!modalElemento) {
+        console.error(
+            "No se encontró modalEnviarStockDispositivo"
+        );
+        return;
+    }
+
+
+    // =====================================================
+    // PREPARAR MODAL
+    // =====================================================
+
+    const inputActivo =
+        document.getElementById(
+            "dispositivoStockActivo"
+        );
+
+    const condicion =
+        document.getElementById(
+            "dispositivoStockCondicion"
+        );
+
+    const motivo =
+        document.getElementById(
+            "dispositivoStockMotivo"
+        );
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEnviarStockDispositivo"
+        );
+
+
+    inputActivo.value = activo;
+
+    condicion.value = "BUENO";
+
+    motivo.value = "";
+
+    mensaje.textContent = "";
+    mensaje.style.display = "none";
+
+
+    // =====================================================
+    // ABRIR MODAL
+    // =====================================================
+
+    document.body.appendChild(modalElemento);
+
+    // Abrir modal
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElemento
+        );
+
+    modal.show();
+}
 // =====================================================
 // INICIALIZAR STOCK
 // =====================================================
@@ -150,6 +267,41 @@ function iniciarStock() {
             }
         );
     }
+
+
+    // =====================================================
+    // LIMPIAR MODAL LIBERAR AL CERRAR
+    // =====================================================
+
+    const modalLiberar =
+        document.getElementById("modalLiberarStock");
+
+    if (modalLiberar) {
+
+        modalLiberar.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                activoPendienteLiberar = null;
+
+                const mensaje =
+                    document.getElementById("mensajeLiberarStock");
+
+                if (mensaje) {
+                    mensaje.style.display = "none";
+                    mensaje.innerHTML = "";
+                    mensaje.className = "stock-mensaje-liberar";
+                }
+
+                const activoTexto =
+                    document.getElementById("activoLiberarStock");
+
+                if (activoTexto) {
+                    activoTexto.textContent = "---";
+                }
+            }
+        );
+    }
 }
 
 // =====================================================
@@ -157,13 +309,216 @@ function iniciarStock() {
 // =====================================================
 
 let dispositivosStock = [];
-
+let activoPendienteEliminar = null;
 let paginaStockActual = 1;
 let registrosStockPorPagina = 10;
 
 // =====================================================
 // CARGAR STOCK DESDE BACKEND
 // =====================================================
+
+function eliminarStock(activo) {
+
+    activoPendienteEliminar = activo;
+
+    // Mostrar activo
+    const activoTexto =
+        document.getElementById("eliminarStockActivo");
+
+    if (activoTexto) {
+        activoTexto.textContent = activo;
+    }
+
+    // Limpiar motivo anterior
+    const motivo =
+        document.getElementById("eliminarStockMotivo");
+
+    if (motivo) {
+        motivo.value = "";
+    }
+
+    // Limpiar mensaje anterior
+    const mensaje =
+        document.getElementById("mensajeEliminarStock");
+
+    if (mensaje) {
+        mensaje.style.display = "none";
+        mensaje.textContent = "";
+    }
+
+    // Abrir modal
+    const modalElemento =
+        document.getElementById("modalEliminarStock");
+
+    if (!modalElemento) {
+        console.error("No se encontró modalEliminarStock");
+        return;
+    }
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(modalElemento);
+
+    modal.show();
+}
+
+async function confirmarEliminarStock() {
+
+    // =====================================================
+    // VALIDAR ACTIVO
+    // =====================================================
+
+    if (!activoPendienteEliminar) {
+        return;
+    }
+
+    // =====================================================
+    // OBTENER MOTIVO
+    // =====================================================
+
+    const motivoInput =
+        document.getElementById("eliminarStockMotivo");
+
+    const motivo = motivoInput
+        ? motivoInput.value.trim()
+        : "";
+
+    if (!motivo) {
+        mostrarMensajeEliminarStock(
+            "Debe indicar el motivo de la baja."
+        );
+        return;
+    }
+
+    // =====================================================
+    // OBTENER USUARIO
+    // =====================================================
+
+    const usuario =
+        sessionStorage.getItem("usuario");
+
+    if (!usuario) {
+        mostrarMensajeEliminarStock(
+            "No se pudo identificar al usuario."
+        );
+        return;
+    }
+
+    // =====================================================
+    // BOTÓN
+    // =====================================================
+
+    const boton =
+        document.getElementById("btnConfirmarEliminarStock");
+
+    if (boton) {
+        boton.disabled = true;
+        boton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Eliminando...
+        `;
+    }
+
+    try {
+
+        // =====================================================
+        // DELETE
+        // =====================================================
+
+        const response = await fetch(
+            `/api/stock/${encodeURIComponent(activoPendienteEliminar)}`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    motivo: motivo,
+                    usuario: usuario
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        // =====================================================
+        // ERROR DEL BACKEND
+        // =====================================================
+
+        if (!response.ok) {
+
+            mostrarMensajeEliminarStock(
+                data.message || "No se pudo dar de baja el equipo."
+            );
+
+            return;
+        }
+
+        // =====================================================
+        // CERRAR MODAL
+        // =====================================================
+
+        const modalElemento =
+            document.getElementById("modalEliminarStock");
+
+        const modal =
+            bootstrap.Modal.getInstance(modalElemento);
+
+        if (modal) {
+            modal.hide();
+        }
+
+        activoPendienteEliminar = null;
+
+        // =====================================================
+        // RECARGAR STOCK
+        // =====================================================
+
+        await cargarStock();
+
+    } catch (error) {
+
+        console.error(
+            "Error eliminando equipo de Stock:",
+            error
+        );
+
+        mostrarMensajeEliminarStock(
+            "Ocurrió un error al intentar dar de baja el equipo."
+        );
+
+    } finally {
+
+        // =====================================================
+        // RESTAURAR BOTÓN
+        // =====================================================
+
+        if (boton) {
+
+            boton.disabled = false;
+
+            boton.innerHTML = `
+                <i class="bi bi-trash3 me-1"></i>
+                Dar de baja
+            `;
+        }
+    }
+}
+
+function mostrarMensajeEliminarStock(mensaje) {
+
+    const contenedor =
+        document.getElementById("mensajeEliminarStock");
+
+    if (!contenedor) {
+        return;
+    }
+
+    contenedor.textContent = mensaje;
+    contenedor.style.display = "block";
+}
+
 
 async function cargarStock() {
 
@@ -178,11 +533,6 @@ async function cargarStock() {
         }
 
         dispositivosStock = await response.json();
-
-        console.log(
-            "STOCK | Dispositivos recibidos:",
-            dispositivosStock
-        );
 
         renderizarStock(dispositivosStock);
 
@@ -268,7 +618,7 @@ function renderizarStock(lista) {
 
 
         return `
-            <tr>
+            <tr onclick="seleccionarFilaStock(this)">
 
                 <td>
                     <span class="badge bg-primary">
@@ -278,7 +628,15 @@ function renderizarStock(lista) {
 
 
                 <td>
+                    ${item.equipo || "---"}
+                </td>
+
+                <td>
                     ${item.modelo || "---"}
+                </td>
+
+                <td>
+                    ${item.codigo || "---"}
                 </td>
 
 
@@ -302,7 +660,13 @@ function renderizarStock(lista) {
                     ${crearBadgeCondicionStock(condicion)}
                 </td>
 
-
+                <td>
+                    <div class="stock-motivo-actual"
+                        title="${item.motivoIngreso || 'Sin motivo'}">
+                        ${item.motivoIngreso || "---"}
+                    </div>
+                </td>
+                
                 <td>
                     ${fecha}
                 </td>
@@ -317,15 +681,42 @@ function renderizarStock(lista) {
 
                 <td class="text-center">
 
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        onclick="gestionarStock('${item.activo}')">
+                    <div class="d-flex justify-content-center gap-1">
 
-                        <i class="bi bi-gear"></i>
-                        Gestionar
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            onclick="editarStock('${item.activo}')"
+                            title="Editar información de Stock">
 
-                    </button>
+                            <i class="bi bi-pencil-square"></i>
+                            Editar
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-success"
+                            onclick="liberarStock('${item.activo}')"
+                            title="Liberar de Stock">
+
+                            <i class="bi bi-box-arrow-up"></i>
+                            Liberar
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="eliminarStock('${item.activo}')"
+                            title="Eliminar dispositivo">
+
+                            <i class="bi bi-trash"></i>
+                            Eliminar
+
+                        </button>
+
+                    </div>
 
                 </td>
 
@@ -338,6 +729,26 @@ function renderizarStock(lista) {
         totalPaginas
     );
 
+}
+
+
+function seleccionarFilaStock(fila) {
+
+    // Si la fila ya está seleccionada, deseleccionarla
+    if (fila.classList.contains("stock-fila-seleccionada")) {
+        fila.classList.remove("stock-fila-seleccionada");
+        return;
+    }
+
+    // Quitar selección de cualquier otra fila
+    document
+        .querySelectorAll(".stock-fila-seleccionada")
+        .forEach(f => {
+            f.classList.remove("stock-fila-seleccionada");
+        });
+
+    // Seleccionar la nueva fila
+    fila.classList.add("stock-fila-seleccionada");
 }
 
 
@@ -414,6 +825,150 @@ function cambiarCantidadStock() {
 
 
 // =====================================================
+// LIBERAR DISPOSITIVO DE STOCK
+// =====================================================
+
+let activoPendienteLiberar = null;
+
+
+function liberarStock(activo) {
+
+    activoPendienteLiberar = activo;
+
+    const activoTexto =
+        document.getElementById("activoLiberarStock");
+
+    if (activoTexto) {
+        activoTexto.textContent = activo;
+    }
+
+    const modalElemento =
+        document.getElementById("modalLiberarStock");
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(modalElemento);
+
+    modal.show();
+}
+
+
+async function confirmarLiberacionStock() {
+
+    if (!activoPendienteLiberar) {
+        return;
+    }
+
+    const boton =
+        document.getElementById("btnConfirmarLiberarStock");
+
+    const textoOriginal = boton.innerHTML;
+
+    try {
+
+        boton.disabled = true;
+
+        boton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Liberando...
+        `;
+
+        const usuario = sessionStorage.getItem("usuario");
+
+        const response = await fetch(
+            `/api/stock/${encodeURIComponent(activoPendienteLiberar)}/liberar`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    comentario: "Equipo liberado de Stock",
+                    usuario: usuario
+                })
+            }
+        );
+
+        const resultado = await response.json();
+
+
+        // ERROR
+        if (!response.ok) {
+
+            mostrarMensajeLiberarStock(
+                resultado.message ||
+                "No fue posible liberar el dispositivo.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        // CERRAR MODAL
+        const modalElemento =
+            document.getElementById("modalLiberarStock");
+
+        const modal =
+            bootstrap.Modal.getInstance(modalElemento);
+
+        if (modal) {
+            modal.hide();
+        }
+
+
+        activoPendienteLiberar = null;
+
+        await cargarStock();
+
+    } catch (error) {
+
+        console.error(
+            "STOCK | Error liberando dispositivo:",
+            error
+        );
+
+        mostrarMensajeLiberarStock(
+            "Ocurrió un error al liberar el dispositivo.",
+            "error"
+        );
+
+    } finally {
+
+        boton.disabled = false;
+        boton.innerHTML = textoOriginal;
+    }
+}
+
+
+
+// =====================================================
+// MENSAJE MODAL LIBERAR STOCK
+// =====================================================
+
+function mostrarMensajeLiberarStock(mensaje, tipo = "error") {
+
+    const contenedor =
+        document.getElementById("mensajeLiberarStock");
+
+    if (!contenedor) {
+        return;
+    }
+
+    contenedor.className =
+        `stock-mensaje-liberar ${tipo}`;
+
+    contenedor.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill"></i>
+
+        <span>
+            ${mensaje}
+        </span>
+    `;
+
+    contenedor.style.display = "flex";
+}
+
+// =====================================================
 // BADGE CONDICIÓN
 // =====================================================
 
@@ -465,13 +1020,16 @@ function filtrarStock() {
             .trim()
             .toLowerCase() || "";
 
-
     const condicion =
         document.getElementById("filtroCondicionStock")
             ?.value || "";
 
 
     const filtrados = dispositivosStock.filter(item => {
+
+        // ==========================================
+        // BUSCADOR
+        // ==========================================
 
         const coincideTexto =
 
@@ -494,11 +1052,22 @@ function filtrarStock() {
                 .includes(texto);
 
 
-        const coincideCondicion =
+        // ==========================================
+        // FILTRO
+        // ==========================================
 
-            !condicion ||
+        let coincideCondicion = true;
 
-            item.condicion === condicion;
+        if (condicion === "REPORTANDO") {
+
+            coincideCondicion =
+                item.reportando === true;
+
+        } else if (condicion) {
+
+            coincideCondicion =
+                item.condicion === condicion;
+        }
 
 
         return coincideTexto && coincideCondicion;
@@ -520,10 +1089,14 @@ function actualizarResumenStock(lista) {
     const total =
         lista.length;
 
-
     const fallas =
         lista.filter(item =>
             item.condicion === "CON FALLA"
+        ).length;
+
+    const totalReportando =
+        lista.filter(item =>
+            item.reportando === true
         ).length;
 
 
@@ -533,24 +1106,20 @@ function actualizarResumenStock(lista) {
     const elementoFalla =
         document.getElementById("stockFalla");
 
+    const elementoReportando =
+        document.getElementById("stockReportando");
+
 
     if (elementoTotal) {
         elementoTotal.textContent = total;
     }
 
-
     if (elementoFalla) {
         elementoFalla.textContent = fallas;
     }
 
-
-    // Esto lo conectaremos después con el estado
-    // real de dispositivos que siguen reportando.
-    const reportando =
-        document.getElementById("stockReportando");
-
-    if (reportando) {
-        reportando.textContent = "0";
+    if (elementoReportando) {
+        elementoReportando.textContent = totalReportando;
     }
 
 }
@@ -689,6 +1258,205 @@ function abrirIngresoStock() {
     }, 300);
 }
 
+
+// =====================================================
+// ABRIR MODAL EDITAR STOCK
+// =====================================================
+
+function editarStock(activo) {
+
+    const item = dispositivosStock.find(
+        d => String(d.activo) === String(activo)
+    );
+
+    if (!item) {
+        console.error(
+            "STOCK | No se encontró el activo:",
+            activo
+        );
+        return;
+    }
+
+    // ACTIVO
+    const activoTexto =
+        document.getElementById("editarStockActivo");
+
+    if (activoTexto) {
+        activoTexto.textContent = item.activo;
+    }
+
+
+    // CONDICIÓN ACTUAL
+    const condicion =
+        document.getElementById("editarStockCondicion");
+
+    if (condicion) {
+        condicion.value = item.condicion || "BUENO";
+    }
+
+
+    const motivo =
+        document.getElementById("editarStockMotivo");
+
+    if (motivo) {
+        motivo.value = "";
+    }
+
+    // LIMPIAR MENSAJE ANTERIOR
+    const mensaje =
+        document.getElementById("mensajeEditarStock");
+
+    if (mensaje) {
+        mensaje.style.display = "none";
+        mensaje.innerHTML = "";
+        mensaje.className = "stock-mensaje-editar";
+    }
+
+
+    // GUARDAR ACTIVO EN EL BOTÓN
+    const boton =
+        document.getElementById("btnGuardarEditarStock");
+
+    if (boton) {
+        boton.dataset.activo = activo;
+    }
+
+
+    // ABRIR MODAL
+    const modalElemento =
+        document.getElementById("modalEditarStock");
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(modalElemento);
+
+    modal.show();
+}
+
+
+async function guardarEdicionStock() {
+
+    const boton =
+        document.getElementById("btnGuardarEditarStock");
+
+    const activo = boton.dataset.activo;
+
+    const condicion =
+        document.getElementById("editarStockCondicion").value;
+
+    const motivo =
+        document.getElementById("editarStockMotivo").value.trim();
+
+    const usuario =
+        sessionStorage.getItem("usuario");
+
+    // =====================================================
+    // VALIDACIONES
+    // =====================================================
+
+    if (!motivo) {
+        mostrarMensajeEditarStock(
+            "Debe indicar el motivo del cambio."
+        );
+
+        document.getElementById("editarStockMotivo").focus();
+        return;
+    }
+
+    if (!usuario) {
+        mostrarMensajeEditarStock(
+            "No se pudo identificar al usuario que realiza el cambio."
+        );
+        return;
+    }
+
+    const textoOriginal = boton.innerHTML;
+
+    try {
+
+        boton.disabled = true;
+
+        boton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Guardando...
+        `;
+
+        const response = await fetch(
+            `/api/stock/${encodeURIComponent(activo)}`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    condicion: condicion,
+                    motivo: motivo,
+                    usuario: usuario
+                })
+            }
+        );
+
+        const resultado = await response.json();
+
+        if (!response.ok) {
+
+            mostrarMensajeEditarStock(
+                resultado.message ||
+                "No fue posible actualizar el equipo."
+            );
+
+            return;
+        }
+
+        const modalElemento =
+            document.getElementById("modalEditarStock");
+
+        const modal =
+            bootstrap.Modal.getInstance(modalElemento);
+
+        if (modal) {
+            modal.hide();
+        }
+
+        await cargarStock();
+
+    } catch (error) {
+
+        console.error(
+            "STOCK | Error actualizando dispositivo:",
+            error
+        );
+
+        mostrarMensajeEditarStock(
+            "Ocurrió un error al actualizar el equipo."
+        );
+
+    } finally {
+
+        boton.disabled = false;
+        boton.innerHTML = textoOriginal;
+
+    }
+}
+
+function mostrarMensajeEditarStock(mensaje) {
+
+    const contenedor =
+        document.getElementById("mensajeEditarStock");
+
+    if (!contenedor) return;
+
+    contenedor.className =
+        "stock-mensaje-editar error";
+
+    contenedor.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>${mensaje}</span>
+    `;
+
+    contenedor.style.display = "flex";
+}
 // =====================================================
 // BUSCAR ACTIVO PARA INGRESAR A STOCK
 // =====================================================
@@ -919,6 +1687,8 @@ async function guardarIngresoStock() {
         // POST STOCK
         // =====================================================
 
+        const usuario = sessionStorage.getItem("usuario");
+
         const response = await fetch("/api/stock", {
 
             method: "POST",
@@ -931,7 +1701,8 @@ async function guardarIngresoStock() {
                 activo: activo,
                 motivo: motivo,
                 condicion: condicion,
-                observacion: observacion
+                observacion: observacion,
+                usuario: usuario
             })
         });
 
@@ -1013,4 +1784,138 @@ async function guardarIngresoStock() {
             text: "Ocurrió un error al ingresar el dispositivo a Stock."
         });
     }
+}
+
+
+
+async function confirmarEnviarDispositivoStock() {
+
+    const activo =
+        document.getElementById("dispositivoStockActivo").value.trim();
+
+    const condicion =
+        document.getElementById("dispositivoStockCondicion").value;
+
+    const motivo =
+        document.getElementById("dispositivoStockMotivo").value.trim();
+
+    const usuario =
+        sessionStorage.getItem("usuario");
+
+    const mensaje =
+        document.getElementById("mensajeEnviarStockDispositivo");
+
+    const boton =
+        document.getElementById("btnEnviarDispositivoStock");
+
+
+    // ==============================
+    // VALIDACIONES
+    // ==============================
+
+    if (!motivo) {
+        mensaje.textContent = "Debe indicar el motivo de ingreso.";
+        mensaje.style.display = "block";
+        return;
+    }
+
+    if (!usuario) {
+        mensaje.textContent = "No se pudo identificar al usuario.";
+        mensaje.style.display = "block";
+        return;
+    }
+
+
+    // ==============================
+    // ENVIAR A STOCK
+    // ==============================
+
+    try {
+
+        boton.disabled = true;
+
+        boton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Enviando...
+        `;
+
+
+        const response = await fetch("/api/stock", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                activo: activo,
+                motivo: motivo,
+                condicion: condicion,
+                observacion: "",
+                usuario: usuario
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            mensaje.textContent =
+                data.message || "No se pudo enviar el equipo a Stock.";
+
+            mensaje.style.display = "block";
+
+            return;
+        }
+
+
+        // ==============================
+        // CERRAR MODAL
+        // ==============================
+
+        const modalElemento =
+            document.getElementById("modalEnviarStockDispositivo");
+
+        const modal =
+            bootstrap.Modal.getInstance(modalElemento);
+
+        if (modal) {
+            modal.hide();
+        }
+
+
+        // Actualizar Stock si ya está cargado
+        if (typeof cargarStock === "function") {
+            await cargarStock();
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Error enviando dispositivo a Stock:",
+            error
+        );
+
+        mensaje.textContent =
+            "Ocurrió un error al enviar el equipo a Stock.";
+
+        mensaje.style.display = "block";
+
+
+    } finally {
+
+        boton.disabled = false;
+
+        boton.innerHTML = `
+            <i class="bi bi-box-arrow-in-down me-1"></i>
+            Enviar a Stock
+        `;
+
+    }
+
 }

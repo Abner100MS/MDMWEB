@@ -1,4 +1,4 @@
-console.log("dashboard.js cargado");
+
 
 async function iniciarDashboard() {
 
@@ -60,7 +60,7 @@ async function iniciarDashboard() {
         `${d.bateria0a19} (${porcentaje(d.bateria0a19)}%)`;
 
     //document.getElementById("bat-sindatos").textContent =
-      //  d.bateriaSinDatos;
+    //  d.bateriaSinDatos;
 
     document.getElementById("bat-total").textContent =
         d.total;
@@ -132,15 +132,7 @@ function crearDonut(canvasId, datos) {
     }
 
 
-    console.log("Canvas:", canvasId);
-
     datos.forEach(x => {
-
-        console.log(
-            "Nombre:", x.nombre,
-            "| Color:", obtenerColor(x.nombre),
-            "| Cantidad:", x.cantidad
-        );
 
     });
     const centerTextPlugin = {

@@ -3,10 +3,10 @@ package repository;
 import Entidad.HistorialStock;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface HistorialStockRepository
         extends JpaRepository<HistorialStock, Long> {
 
-    List<HistorialStock> findByActivoOrderByFechaDesc(String activo);
+    Optional<HistorialStock> findByActivo(String activo);
 }

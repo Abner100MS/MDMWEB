@@ -4,10 +4,12 @@ import Entidad.Stock;
 import Entidad.HistorialStock;
 import repository.StockRepository;
 import repository.HistorialStockRepository;
+import repository.TabletRepository;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -18,13 +20,16 @@ public class StockController {
 
         private final StockRepository stockRepository;
         private final HistorialStockRepository historialStockRepository;
+        private final TabletRepository tabletRepository;
 
         public StockController(
                         StockRepository stockRepository,
-                        HistorialStockRepository historialStockRepository) {
+                        HistorialStockRepository historialStockRepository,
+                        TabletRepository tabletRepository) {
 
                 this.stockRepository = stockRepository;
                 this.historialStockRepository = historialStockRepository;
+                this.tabletRepository = tabletRepository;
         }
 
         // =====================================================
@@ -32,9 +37,10 @@ public class StockController {
         // =====================================================
 
         @GetMapping
-        public ResponseEntity<List<Stock>> listarStock() {
+        public ResponseEntity<List<Map<String, Object>>> listarStock() {
 
-                return ResponseEntity.ok(stockRepository.findAll());
+                return ResponseEntity.ok(
+                                stockRepository.listarStockCompleto());
         }
 
         // =====================================================
@@ -65,6 +71,11 @@ public class StockController {
                 String motivo = body.get("motivo");
                 String condicion = body.get("condicion");
                 String observacion = body.get("observacion");
+                String usuario = body.get("usuario");
+
+                // =====================================================
+                // VALIDAR ACTIVO
+                // =====================================================
 
                 if (activo == null || activo.trim().isEmpty()) {
                         return ResponseEntity.badRequest().body(
@@ -73,6 +84,10 @@ public class StockController {
                                                         "message", "El activo es obligatorio"));
                 }
 
+                // =====================================================
+                // VALIDAR MOTIVO
+                // =====================================================
+
                 if (motivo == null || motivo.trim().isEmpty()) {
                         return ResponseEntity.badRequest().body(
                                         Map.of(
@@ -80,7 +95,24 @@ public class StockController {
                                                         "message", "El motivo es obligatorio"));
                 }
 
+                // =====================================================
+                // VALIDAR USUARIO
+                // =====================================================
+
+                if (usuario == null || usuario.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "No se pudo identificar al usuario"));
+                }
+
                 activo = activo.trim();
+                motivo = motivo.trim();
+                usuario = usuario.trim();
+
+                // =====================================================
+                // VALIDAR SI YA ESTÁ EN STOCK
+                // =====================================================
 
                 if (stockRepository.existsByActivo(activo)) {
                         return ResponseEntity.badRequest().body(
@@ -89,13 +121,18 @@ public class StockController {
                                                         "message", "El activo ya se encuentra en Stock"));
                 }
 
+                // =====================================================
+                // CREAR STOCK
+                // =====================================================
+
                 Stock stock = new Stock();
 
                 stock.setActivo(activo);
-                stock.setMotivoIngreso(motivo.trim());
+                stock.setMotivoIngreso(motivo);
 
                 if (condicion != null && !condicion.trim().isEmpty()) {
-                        stock.setCondicion(condicion.trim().toUpperCase());
+                        stock.setCondicion(
+                                        condicion.trim().toUpperCase());
                 } else {
                         stock.setCondicion("BUENO");
                 }
@@ -104,14 +141,20 @@ public class StockController {
 
                 Stock guardado = stockRepository.save(stock);
 
-                // Guardar historial
-                HistorialStock historial = new HistorialStock();
+                // =====================================================
+                // REGISTRAR HISTORIAL
+                // =====================================================
 
-                historial.setActivo(activo);
-                historial.setAccion("INGRESO_STOCK");
-                historial.setComentario(motivo.trim());
+                registrarHistorialStock(
+                                activo,
+                                "INGRESO_STOCK",
+                                stock.getCondicion(),
+                                motivo,
+                                usuario);
 
-                historialStockRepository.save(historial);
+                // =====================================================
+                // RESPUESTA
+                // =====================================================
 
                 return ResponseEntity.ok(
                                 Map.of(
@@ -119,7 +162,6 @@ public class StockController {
                                                 "message", "Equipo ingresado a Stock correctamente",
                                                 "stock", guardado));
         }
-
         // =====================================================
         // LIBERAR EQUIPO DE STOCK
         // =====================================================
@@ -138,7 +180,32 @@ public class StockController {
                                                         "message", "El activo no se encuentra en Stock"));
                 }
 
+                // =====================================================
+                // VALIDAR QUE EL EQUIPO EXISTA EN EL MDM
+                // =====================================================
+
+                boolean existeEnMdm = tabletRepository.findByActivo(activo).isPresent();
+
+                if (!existeEnMdm) {
+
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message",
+                                                        "El activo " + activo
+                                                                        + " nunca ha sido registrado en el MDM. "
+                                                                        + "Debe vincular el dispositivo antes de liberarlo de Stock"));
+                }
+
+                // =====================================================
+                // OBTENER DATOS
+                // =====================================================
+
                 String comentario = "Equipo liberado de Stock";
+
+                String usuario = body != null
+                                ? body.get("usuario")
+                                : null;
 
                 if (body != null
                                 && body.get("comentario") != null
@@ -147,16 +214,35 @@ public class StockController {
                         comentario = body.get("comentario").trim();
                 }
 
-                // Primero guardamos historial
-                HistorialStock historial = new HistorialStock();
+                // =====================================================
+                // VALIDAR USUARIO
+                // =====================================================
 
-                historial.setActivo(activo);
-                historial.setAccion("LIBERADO_STOCK");
-                historial.setComentario(comentario);
+                if (usuario == null || usuario.trim().isEmpty()) {
 
-                historialStockRepository.save(historial);
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "No se pudo identificar al usuario"));
+                }
 
-                // Después sale del Stock actual
+                usuario = usuario.trim();
+
+                // =====================================================
+                // REGISTRAR LIBERACIÓN EN HISTORIAL
+                // =====================================================
+
+                registrarHistorialStock(
+                                activo,
+                                "LIBERADO_STOCK",
+                                stock.getCondicion(),
+                                comentario,
+                                usuario);
+
+                // =====================================================
+                // ELIMINAR DEL STOCK ACTUAL
+                // =====================================================
+
                 stockRepository.delete(stock);
 
                 return ResponseEntity.ok(
@@ -165,20 +251,22 @@ public class StockController {
                                                 "message", "Equipo liberado de Stock correctamente",
                                                 "activo", activo));
         }
-
         // =====================================================
         // HISTORIAL DE UN ACTIVO
         // =====================================================
 
         @GetMapping("/{activo}/historial")
-        public ResponseEntity<List<HistorialStock>> obtenerHistorial(
+        public ResponseEntity<?> obtenerHistorial(
                         @PathVariable String activo) {
 
-                return ResponseEntity.ok(
-                                historialStockRepository
-                                                .findByActivoOrderByFechaDesc(activo));
+                return historialStockRepository.findByActivo(activo)
+                                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                                .orElseGet(() -> ResponseEntity.status(404).body(
+                                                Map.of(
+                                                                "success", false,
+                                                                "message",
+                                                                "No existe historial para el activo " + activo)));
         }
-
         // =====================================================
         // BUSCAR INFORMACIÓN DE ACTIVO PARA INGRESO A STOCK
         // =====================================================
@@ -201,5 +289,267 @@ public class StockController {
                 }
 
                 return ResponseEntity.ok(info);
+        }
+
+        // =====================================================
+        // EDITAR EQUIPO EN STOCK
+        // =====================================================
+
+        @PutMapping("/{activo}")
+        public ResponseEntity<?> editarStock(
+                        @PathVariable String activo,
+                        @RequestBody Map<String, String> body) {
+
+                Stock stock = stockRepository.findByActivo(activo).orElse(null);
+
+                if (stock == null) {
+                        return ResponseEntity.status(404).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "El activo no se encuentra en Stock"));
+                }
+
+                // =====================================================
+                // DATOS RECIBIDOS
+                // =====================================================
+
+                String condicion = body.get("condicion");
+                String motivo = body.get("motivo");
+                String usuario = body.get("usuario");
+
+                // =====================================================
+                // VALIDAR CONDICIÓN
+                // =====================================================
+
+                if (condicion == null || condicion.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "La condición es obligatoria"));
+                }
+
+                condicion = condicion.trim().toUpperCase();
+
+                if (!condicion.equals("BUENO")
+                                && !condicion.equals("CON FALLA")) {
+
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "La condición seleccionada no es válida"));
+                }
+
+                // =====================================================
+                // VALIDAR MOTIVO
+                // =====================================================
+
+                if (motivo == null || motivo.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "Debe indicar el motivo del cambio"));
+                }
+
+                // =====================================================
+                // VALIDAR USUARIO
+                // =====================================================
+
+                if (usuario == null || usuario.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "No se pudo identificar al usuario"));
+                }
+
+                motivo = motivo.trim();
+                usuario = usuario.trim();
+
+                // =====================================================
+                // ACTUALIZAR STOCK
+                // =====================================================
+
+                stock.setCondicion(condicion);
+                stock.setMotivoIngreso(motivo);
+
+                stockRepository.save(stock);
+
+                // =====================================================
+                // REGISTRAR HISTORIAL
+                // =====================================================
+
+                registrarHistorialStock(
+                                activo,
+                                "ACTUALIZACION_STOCK",
+                                condicion,
+                                motivo,
+                                usuario);
+
+                // =====================================================
+                // RESPUESTA
+                // =====================================================
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "message", "Información de Stock actualizada correctamente"));
+        }
+
+        private void registrarHistorialStock(
+                        String activo,
+                        String accion,
+                        String condicion,
+                        String motivo,
+                        String usuario) {
+
+                LocalDateTime ahora = LocalDateTime.now();
+
+                HistorialStock historial = historialStockRepository.findByActivo(activo)
+                                .orElse(null);
+
+                // =====================================================
+                // PRIMER MOVIMIENTO DEL ACTIVO
+                // =====================================================
+
+                if (historial == null) {
+
+                        historial = new HistorialStock();
+
+                        historial.setActivo(activo);
+
+                        historial.setAccionActual(accion);
+                        historial.setCondicionActual(condicion);
+                        historial.setMotivoActual(motivo);
+                        historial.setUsuarioActual(usuario);
+                        historial.setFechaActual(ahora);
+
+                        historialStockRepository.save(historial);
+
+                        return;
+                }
+
+                // =====================================================
+                // ACTUAL PASA A ANTERIOR
+                // =====================================================
+
+                historial.setAccionAnterior(
+                                historial.getAccionActual());
+
+                historial.setCondicionAnterior(
+                                historial.getCondicionActual());
+
+                historial.setMotivoAnterior(
+                                historial.getMotivoActual());
+
+                historial.setUsuarioAnterior(
+                                historial.getUsuarioActual());
+
+                historial.setFechaAnterior(
+                                historial.getFechaActual());
+
+                // =====================================================
+                // NUEVO MOVIMIENTO PASA A ACTUAL
+                // =====================================================
+
+                historial.setAccionActual(accion);
+                historial.setCondicionActual(condicion);
+                historial.setMotivoActual(motivo);
+                historial.setUsuarioActual(usuario);
+                historial.setFechaActual(ahora);
+
+                // =====================================================
+                // ACTUALIZA LA MISMA FILA
+                // =====================================================
+
+                historialStockRepository.save(historial);
+        }
+
+        // =====================================================
+        // ELIMINAR / DAR DE BAJA EQUIPO
+        // =====================================================
+
+        @DeleteMapping("/{activo}")
+        public ResponseEntity<?> eliminarStock(
+                        @PathVariable String activo,
+                        @RequestBody Map<String, String> body) {
+
+                // =====================================================
+                // BUSCAR EQUIPO EN STOCK
+                // =====================================================
+
+                Stock stock = stockRepository.findByActivo(activo).orElse(null);
+
+                if (stock == null) {
+                        return ResponseEntity.status(404).body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "El activo no se encuentra en Stock"));
+                }
+
+                // =====================================================
+                // DATOS RECIBIDOS
+                // =====================================================
+
+                String motivo = body.get("motivo");
+                String usuario = body.get("usuario");
+
+                // =====================================================
+                // VALIDAR MOTIVO
+                // =====================================================
+
+                if (motivo == null || motivo.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "Debe indicar el motivo de la baja"));
+                }
+
+                // =====================================================
+                // VALIDAR USUARIO
+                // =====================================================
+
+                if (usuario == null || usuario.trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body(
+                                        Map.of(
+                                                        "success", false,
+                                                        "message", "No se pudo identificar al usuario"));
+                }
+
+                motivo = motivo.trim();
+                usuario = usuario.trim();
+
+                // =====================================================
+                // REGISTRAR BAJA EN HISTORIAL
+                // IMPORTANTE: SE HACE ANTES DE ELIMINAR
+                // =====================================================
+
+                registrarHistorialStock(
+                                activo,
+                                "BAJA_STOCK",
+                                stock.getCondicion(),
+                                motivo,
+                                usuario);
+
+                // =====================================================
+                // ELIMINAR DE DISPOSITIVOS SI EXISTE EN EL MDM
+                // =====================================================
+
+                tabletRepository.findByActivo(activo)
+                                .ifPresent(tabletRepository::delete);
+
+                // =====================================================
+                // ELIMINAR DEL STOCK ACTUAL
+                // =====================================================
+
+                stockRepository.delete(stock);
+
+                // =====================================================
+                // RESPUESTA
+                // =====================================================
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "success", true,
+                                                "message", "Equipo dado de baja correctamente",
+                                                "activo", activo));
         }
 }
