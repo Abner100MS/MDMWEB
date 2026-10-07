@@ -1919,3 +1919,127 @@ async function confirmarEnviarDispositivoStock() {
     }
 
 }
+
+function abrirReporteStock() {
+
+    const modalElemento =
+        document.getElementById("modalReporteStock");
+
+    if (!modalElemento) {
+        console.error("No se encontró modalReporteStock");
+        return;
+    }
+
+    // Mover el modal directamente al body
+    // para evitar que quede detrás de la vista Stock
+    document.body.appendChild(modalElemento);
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElemento
+        );
+
+    modal.show();
+}
+
+
+function generarReporteExcelStock() {
+
+    // =====================================================
+    // FILTROS ACTUALES DE STOCK
+    // =====================================================
+
+    const buscar =
+        document.getElementById("buscarStock")
+            ?.value
+            .trim() || "";
+
+    const filtro =
+        document.getElementById("filtroCondicionStock")
+            ?.value || "";
+
+
+    // =====================================================
+    // COLUMNAS SELECCIONADAS
+    // =====================================================
+
+    const columnas = [];
+
+    document
+        .querySelectorAll(".stock-reporte-columna:checked")
+        .forEach(c => {
+
+            columnas.push(c.value);
+
+        });
+
+
+    // =====================================================
+    // VALIDAR COLUMNAS
+    // =====================================================
+
+    if (columnas.length === 0) {
+
+        Swal.fire({
+            icon: "warning",
+            title: "Seleccione columnas",
+            text: "Debe seleccionar al menos una columna para generar el reporte."
+        });
+
+        return;
+    }
+
+
+    // =====================================================
+    // CONSTRUIR URL
+    // =====================================================
+
+    const url =
+        `/api/stock/reporte?` +
+        `buscar=${encodeURIComponent(buscar)}` +
+        `&filtro=${encodeURIComponent(filtro)}` +
+        `&columnas=${encodeURIComponent(columnas.join(","))}`;
+
+
+    console.log(
+        "STOCK | Generando reporte:",
+        url
+    );
+
+
+    // =====================================================
+    // DESCARGAR EXCEL
+    // =====================================================
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.style.display = "none";
+
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+
+    // =====================================================
+    // CERRAR MODAL
+    // =====================================================
+
+    const modalElemento =
+        document.getElementById("modalReporteStock");
+
+    const modal =
+        bootstrap.Modal.getInstance(
+            modalElemento
+        );
+
+    if (modal) {
+
+        modal.hide();
+    }
+}

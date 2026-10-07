@@ -5,7 +5,11 @@ import Entidad.HistorialStock;
 import repository.StockRepository;
 import repository.HistorialStockRepository;
 import repository.TabletRepository;
+import service.StockService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +25,9 @@ public class StockController {
         private final StockRepository stockRepository;
         private final HistorialStockRepository historialStockRepository;
         private final TabletRepository tabletRepository;
+
+        @Autowired
+        private StockService stockService;
 
         public StockController(
                         StockRepository stockRepository,
@@ -551,5 +558,37 @@ public class StockController {
                                                 "success", true,
                                                 "message", "Equipo dado de baja correctamente",
                                                 "activo", activo));
+        }
+
+        @GetMapping("/reporte")
+        public ResponseEntity<byte[]> generarReporteStock(
+                        @RequestParam(required = false) String buscar,
+                        @RequestParam(required = false) String filtro,
+                        @RequestParam(required = false) String columnas) {
+
+                try {
+
+                        byte[] archivo = stockService.obtenerReporteStock(
+                                        buscar,
+                                        filtro,
+                                        columnas);
+
+                        return ResponseEntity.ok()
+                                        .header(
+                                                        HttpHeaders.CONTENT_DISPOSITION,
+                                                        "attachment; filename=Reporte_Stock.xlsx")
+                                        .contentType(
+                                                        MediaType.parseMediaType(
+                                                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                                        .body(archivo);
+
+                } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        return ResponseEntity
+                                        .internalServerError()
+                                        .build();
+                }
         }
 }

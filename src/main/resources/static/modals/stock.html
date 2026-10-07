@@ -126,9 +126,7 @@
 
                 <select id="filtroCondicionStock" class="form-select">
 
-                    <option value="">
-                        Filtros
-                    </option>
+                    <option value="">Filtros</option>
 
                     <option value="BUENO">
                         Bueno
@@ -138,16 +136,30 @@
                         Con falla
                     </option>
 
-                    <option value="REPORTANDO">Reportando</option>
+                    <option value="REPORTANDO">
+                        Reportando
+                    </option>
 
                 </select>
+
+            </div>
+
+
+            <!-- REPORTE EXCEL -->
+            <div class="col d-flex justify-content-end">
+
+                <button type="button" class="btn btn-success" onclick="abrirReporteStock()">
+
+                    <i class="bi bi-file-earmark-excel me-1"></i>
+                    Generar Reporte
+
+                </button>
 
             </div>
 
         </div>
 
     </div>
-
 
     <!-- TABLA -->
     <div class="stock-tabla-container">
@@ -954,6 +966,205 @@
 
                         <i class="bi bi-box-arrow-in-down me-1"></i>
                         Enviar a Stock
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL REPORTE EXCEL STOCK -->
+    <!-- ===================================================== -->
+
+    <div class="modal fade" id="modalReporteStock" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <!-- HEADER -->
+                <div class="modal-header bg-success text-white">
+
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-excel me-2"></i>
+                        Generar Reporte
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <!-- BODY -->
+                <div class="modal-body">
+
+                    <div class="alert alert-light border small">
+                        Se exportarán únicamente los equipos de Stock
+                        que coincidan con los filtros actualmente aplicados.
+                    </div>
+
+
+                    <div class="fw-bold mb-2">
+                        <i class="bi bi-table me-1"></i>
+                        Columnas del reporte
+                    </div>
+
+
+                    <div class="row">
+
+                        <!-- COLUMNA IZQUIERDA -->
+                        <div class="col-md-6">
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="activo"
+                                    id="reporteStockActivo" checked>
+
+                                <label class="form-check-label" for="reporteStockActivo">
+                                    Activo
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="equipo"
+                                    id="reporteStockEquipo" checked>
+
+                                <label class="form-check-label" for="reporteStockEquipo">
+                                    Equipo
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="modelo"
+                                    id="reporteStockModelo" checked>
+
+                                <label class="form-check-label" for="reporteStockModelo">
+                                    Modelo
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="codigo"
+                                    id="reporteStockCodigo" checked>
+
+                                <label class="form-check-label" for="reporteStockCodigo">
+                                    Código
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="empleado"
+                                    id="reporteStockEmpleado" checked>
+
+                                <label class="form-check-label" for="reporteStockEmpleado">
+                                    Empleado
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="planta"
+                                    id="reporteStockPlanta" checked>
+
+                                <label class="form-check-label" for="reporteStockPlanta">
+                                    Planta
+                                </label>
+                            </div>
+
+                        </div>
+
+
+                        <!-- COLUMNA DERECHA -->
+                        <div class="col-md-6">
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="area"
+                                    id="reporteStockArea" checked>
+
+                                <label class="form-check-label" for="reporteStockArea">
+                                    Área
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox"
+                                    value="departamento" id="reporteStockDepartamento" checked>
+
+                                <label class="form-check-label" for="reporteStockDepartamento">
+                                    Departamento
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="condicion"
+                                    id="reporteStockCondicion" checked>
+
+                                <label class="form-check-label" for="reporteStockCondicion">
+                                    Condición
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox"
+                                    value="motivoIngreso" id="reporteStockMotivo" checked>
+
+                                <label class="form-check-label" for="reporteStockMotivo">
+                                    Motivo de ingreso
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox"
+                                    value="fechaIngreso" id="reporteStockFecha" checked>
+
+                                <label class="form-check-label" for="reporteStockFecha">
+                                    Fecha de ingreso
+                                </label>
+                            </div>
+
+
+                            <div class="form-check">
+                                <input class="form-check-input stock-reporte-columna" type="checkbox" value="reportando"
+                                    id="reporteStockReportando" checked>
+
+                                <label class="form-check-label" for="reporteStockReportando">
+                                    Reportando
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="button" class="btn btn-success" id="btnGenerarExcelStock"
+                        onclick="generarReporteExcelStock()">
+
+                        <i class="bi bi-download me-1"></i>
+                        Generar Excel
 
                     </button>
 

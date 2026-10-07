@@ -353,12 +353,6 @@ public class TabletController {
 
                 Pageable pageable = PageRequest.of(page, size);
 
-                System.out.println("PLANTA = [" + planta + "]");
-                System.out.println("CATEGORIA = [" + categoria + "]");
-                System.out.println("VERSION = [" + version + "]");
-                System.out.println("BUSCAR = [" + buscar + "]");
-                System.out.println("ESTADO = [" + estadoCargador + "]");
-
                 return tabletService.obtenerDashboard(
                                 buscar,
                                 planta,
