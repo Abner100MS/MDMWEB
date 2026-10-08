@@ -1,0 +1,481 @@
+/* =====================================================
+   HISTORIAL WI-FI - TATA MDM
+===================================================== */
+
+/* CONTENEDOR PRINCIPAL */
+#vista-historial-wifi {
+    width: 100%;
+    min-width: 0;
+}
+
+/* =====================================================
+   ENCABEZADO
+===================================================== */
+
+#vistaHistorialWifi h4 {
+    color: #263445;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+#vistaHistorialWifi h4 i {
+    color: #2563eb;
+}
+
+#vistaHistorialWifi p {
+    font-size: 0.85rem;
+}
+
+/* =====================================================
+   TARJETAS
+===================================================== */
+
+#vistaHistorialWifi .card {
+    border-radius: 10px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+/* TARJETA DE RESULTADOS */
+#vistaHistorialWifi .wifi-card-resultados {
+    height: calc(100dvh - 300px);
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+}
+
+#vistaHistorialWifi .wifi-card-resultados>.card-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#vistaHistorialWifi .wifi-card-resultados>.card-header,
+#vistaHistorialWifi .wifi-card-resultados>.card-footer {
+    flex-shrink: 0;
+}
+
+#vistaHistorialWifi .card-body {
+    min-width: 0;
+}
+
+#vistaHistorialWifi .card-header {
+    background: #ffffff;
+}
+
+#vistaHistorialWifi .card-footer {
+    background: #ffffff;
+}
+
+/* =====================================================
+   FILTROS
+===================================================== */
+
+#vistaHistorialWifi .form-label {
+    font-size: 0.82rem;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+#vistaHistorialWifi .form-control {
+    height: 38px;
+    font-size: 0.85rem;
+    border: 1px solid #dce2e9;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #334155;
+}
+
+#vistaHistorialWifi .form-control:focus {
+    border-color: #93b4f5;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+#vistaHistorialWifi .form-control::placeholder {
+    color: #94a3b8;
+}
+
+/* CHECKBOX VER HISTORIAL */
+
+#vistaHistorialWifi .form-check {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    margin: 0;
+}
+
+#vistaHistorialWifi .form-check-input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    border-color: #cbd5e1;
+}
+
+#vistaHistorialWifi .form-check-input:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+#vistaHistorialWifi .form-check-label {
+    font-size: 0.85rem;
+    color: #475569;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* =====================================================
+   BOTONES
+===================================================== */
+
+#vistaHistorialWifi .btn {
+    font-size: 0.84rem;
+    font-weight: 500;
+    border-radius: 6px;
+    min-height: 38px;
+    white-space: nowrap;
+}
+
+#btnBuscarHistorialWifi {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+#btnBuscarHistorialWifi:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+#btnLimpiarHistorialWifi {
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+#btnLimpiarHistorialWifi:hover {
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+/* =====================================================
+   ENCABEZADO DE RESULTADOS
+===================================================== */
+
+#vistaHistorialWifi .card-header h6 {
+    color: #334155;
+    font-size: 0.92rem;
+}
+
+#wifiTotalResultados {
+    background-color: #e9efff !important;
+    color: #3159a8 !important;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 7px 11px;
+}
+
+/* =====================================================
+   TABLA DE HISTORIAL WI-FI
+===================================================== */
+
+#tablaHistorialWifi {
+    width: 100%;
+    font-size: 0.85rem;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* ACTIVOS CON EL MISMO TAMAÑO QUE STOCK */
+#tablaHistorialWifi .badge.bg-primary {
+    font-size: 0.75rem;
+    padding: 6px 9px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+#tablaHistorialWifi thead th {
+    background-color: #f5f7fa;
+    color: #475569;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 13px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#tablaHistorialWifi tbody td {
+    padding: 12px;
+    color: #475569;
+    border-bottom: 1px solid #edf1f5;
+    vertical-align: middle;
+}
+
+#tablaHistorialWifi tbody tr:hover td {
+    background-color: #f8faff;
+}
+
+#tablaHistorialWifi tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ACTIVO */
+
+#tablaHistorialWifi tbody td:first-child {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+/* SSID */
+
+#tablaHistorialWifi tbody td:nth-child(2) {
+    font-weight: 500;
+    color: #334155;
+}
+
+/* FECHAS */
+
+#tablaHistorialWifi tbody td:nth-child(3),
+#tablaHistorialWifi tbody td:nth-child(4) {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* DURACIÓN */
+
+#tablaHistorialWifi tbody td:nth-child(5) {
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* MOTIVO */
+
+#tablaHistorialWifi tbody td:nth-child(6) {
+    min-width: 155px;
+}
+
+/* TOTAL DE REGISTROS */
+
+#tablaHistorialWifi thead th:last-child,
+#tablaHistorialWifi tbody td:last-child {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* =====================================================
+   PAGINACIÓN
+===================================================== */
+
+#wifiInfoPaginacion {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+#wifiNumeroPagina {
+    color: #334155;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+#wifiPaginaAnterior,
+#wifiPaginaSiguiente {
+    min-height: 32px !important;
+    padding: 5px 11px;
+    font-size: 0.78rem !important;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+#wifiPaginaAnterior:hover:not(:disabled),
+#wifiPaginaSiguiente:hover:not(:disabled) {
+    background-color: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+
+#wifiPaginaAnterior:disabled,
+#wifiPaginaSiguiente:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+
+
+/* =====================================================
+   AJUSTES DE DISTRIBUCIÓN - HISTORIAL WI-FI
+===================================================== */
+
+/* ACERCAR LA VISTA AL ENCABEZADO DEL USUARIO */
+#vistaHistorialWifi {
+    padding-top: 4px !important;
+}
+
+/* REDUCIR ESPACIO DEL TÍTULO */
+#vistaHistorialWifi>.d-flex:first-child {
+    margin-bottom: 10px !important;
+}
+
+/* FILTROS MÁS COMPACTOS */
+#vistaHistorialWifi .wifi-filtros-row {
+    row-gap: 8px;
+    column-gap: 0;
+}
+
+/* CAMPOS DE FECHA MÁS PEQUEÑOS */
+#vistaHistorialWifi #wifiFechaDesde,
+#vistaHistorialWifi #wifiFechaHasta {
+    width: 180px;
+    max-width: 100%;
+}
+
+#vistaHistorialWifi .wifi-filtros-row .form-label {
+    margin-bottom: 5px;
+}
+
+#vistaHistorialWifi .wifi-filtros-row .form-control {
+    height: 36px;
+}
+
+#vistaHistorialWifi #wifiFiltroActivo {
+    width: 260px;
+    max-width: 100%;
+}
+
+/* VER HISTORIAL DEBAJO DEL ACTIVO */
+#vistaHistorialWifi .wifi-check-historial {
+    min-height: 22px;
+    height: auto;
+    margin-top: 8px !important;
+    justify-content: flex-start;
+}
+
+#vistaHistorialWifi .wifi-check-historial .form-check-label {
+    font-weight: 500;
+}
+
+/* BOTONES CERCA DE LOS FILTROS */
+#vistaHistorialWifi .wifi-filtros-botones {
+    padding-top: 27px;
+}
+
+#vistaHistorialWifi .wifi-filtros-botones>div {
+    justify-content: flex-start;
+}
+
+#btnBuscarHistorialWifi,
+#btnLimpiarHistorialWifi {
+    min-width: 105px;
+    min-height: 36px !important;
+    padding: 6px 15px;
+}
+
+#vistaHistorialWifi .table-responsive {
+    height: 100%;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* EVITAR CAMBIOS BRUSCOS EN LAS FILAS */
+#tablaHistorialWifi {
+    table-layout: auto;
+}
+
+#tablaHistorialWifi tbody td {
+    height: 43px;
+}
+
+/* PAGINACIÓN AL FINAL DE LA TARJETA */
+#vistaHistorialWifi .card-footer {
+    min-height: 65px;
+    display: flex;
+    align-items: center;
+}
+
+#vistaHistorialWifi .card-footer>div {
+    width: 100%;
+}
+
+/* EVITAR QUE LOS TEXTOS SE DESBORDEN */
+#tablaHistorialWifi td,
+#tablaHistorialWifi th {
+    overflow-wrap: normal;
+}
+
+/* PANTALLAS PEQUEÑAS */
+@media (max-width: 767px) {
+
+    #vistaHistorialWifi .wifi-filtros-botones {
+        padding-top: 0;
+    }
+
+    #vistaHistorialWifi .wifi-filtros-botones>div {
+        width: 100%;
+    }
+
+    #btnBuscarHistorialWifi,
+    #btnLimpiarHistorialWifi {
+        flex: 1;
+    }
+
+    #vistaHistorialWifi .table-responsive {
+        min-height: 320px;
+    }
+}
+
+
+
+
+
+/* =====================================================
+   PANTALLAS MEDIANAS
+===================================================== */
+
+@media (max-width: 1199px) {
+
+    #tablaHistorialWifi {
+        min-width: 950px;
+    }
+
+    #vistaHistorialWifi .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+/* =====================================================
+   TABLETS Y CELULARES
+===================================================== */
+
+@media (max-width: 767px) {
+
+    #vistaHistorialWifi {
+        padding: 12px !important;
+    }
+
+    #vistaHistorialWifi h4 {
+        font-size: 1.15rem;
+    }
+
+    #vistaHistorialWifi .card-body {
+        padding: 14px;
+    }
+
+    #vistaHistorialWifi .form-control {
+        width: 100%;
+    }
+
+    #vistaHistorialWifi .card-footer>div {
+        justify-content: center !important;
+        gap: 12px;
+    }
+
+    #wifiInfoPaginacion {
+        width: 100%;
+        text-align: center;
+    }
+
+    #tablaHistorialWifi {
+        min-width: 950px;
+    }
+}

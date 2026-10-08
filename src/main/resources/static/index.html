@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/CSS/detalle.css">
     <link rel="stylesheet" href="/CSS/stock.css">
+    <link rel="stylesheet" href="/CSS/historial-wifi.css">
     <link rel="stylesheet" href="/CSS/Tarea.css">
 
     <style>
@@ -705,6 +706,13 @@
 
                 <i class="bi bi-box-seam me-2"></i>
                 Stock
+
+            </a>
+            <a id="menuHistorialWifi" class="nav-link text-secondary" href="#"
+                onclick="mostrarVistaHistorialWifi(); return false;">
+
+                <i class="bi bi-wifi me-2"></i>
+                Hist. WiFi
 
             </a>
         </nav>
@@ -2002,6 +2010,8 @@
         <!-- Vista Stock -->
         <div id="vista-stock" style="display: none;"></div>
 
+        <div id="vista-historial-wifi" style="display:none;"></div>
+
         <div class="modal fade" id="modalRol" tabindex="-1">
 
             <div class="modal-dialog">
@@ -2902,6 +2912,10 @@
                         break;
 
                     case "stock":
+                        mostrarVistaStock();
+                        break;
+
+                    case "historial-wifi":
                         mostrarVistaStock();
                         break;
 
@@ -7390,6 +7404,7 @@
                 document.getElementById("vista-roles").style.display = "none";
                 document.getElementById("vista-tareas").style.display = "none";
                 document.getElementById("vista-stock").style.display = "none";
+                document.getElementById("vista-historial-wifi").style.display = "none";
 
             }
 
@@ -7569,6 +7584,7 @@
         <script src="/tareas.js"></script>
         <script src="/JS/detalle.js"></script>
         <script src="/JS/stock.js"></script>
+        <script src="/JS/historial-wifi.js"></script>
         <script src="/modales.js"></script>
 
         <div id="contenedorModalDetalle"></div>
