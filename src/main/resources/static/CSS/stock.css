@@ -158,7 +158,7 @@
 }
 
 .stock-tabla-container table {
-    width: auto;
+    width: max-content;
     min-width: 100%;
     margin-bottom: 0;
     table-layout: auto;
@@ -197,7 +197,7 @@
 
 .stock-tabla-container th:last-child,
 .stock-tabla-container td:last-child {
-    width: 1px;
+    min-width: 165px;
     white-space: nowrap;
     text-align: center;
 }
@@ -937,13 +937,16 @@
 }
 
 .stock-motivo-actual {
-    width: 180px;
+    width: 100%;
     max-width: 180px;
+
+    margin: 0 auto;
 
     white-space: normal;
     overflow: hidden;
 
     line-height: 1.25;
+    text-align: center;
 
     display: -webkit-box;
     -webkit-line-clamp: 2;
