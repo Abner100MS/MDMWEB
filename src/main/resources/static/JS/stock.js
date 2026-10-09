@@ -702,14 +702,6 @@ function renderizarStock(lista) {
                     ${fecha}
                 </td>
 
-
-                <td>
-                    <span class="badge bg-secondary">
-                        EN STOCK
-                    </span>
-                </td>
-
-
                 <td class="text-center">
 
                     <div class="stock-acciones">
