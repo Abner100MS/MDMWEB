@@ -4,9 +4,16 @@
 
 .stock-container {
     width: 100%;
-    padding: 6px 0 20px 0;
-}
+    height: calc(100dvh - 100px);
+    min-width: 0;
+    min-height: 0;
 
+    display: flex;
+    flex-direction: column;
+
+    padding: 6px 0 12px 0;
+    overflow: hidden;
+}
 
 /* =========================================================
    ENCABEZADO
@@ -136,16 +143,18 @@
 ========================================================= */
 
 .stock-tabla-container {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    flex: 1 1 auto;
+
     background: #ffffff;
     border: 1px solid #dfe5ec;
     border-radius: 8px 8px 0 0;
 
-    min-height: 260px;
-    max-height: calc(100vh - 390px);
-
-    overflow-y: auto;
     overflow-x: auto;
-
+    overflow-y: auto;
 }
 
 .stock-tabla-container table {
@@ -159,6 +168,8 @@
 .stock-tabla-container td {
     width: auto;
     white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .stock-tabla-container th:not(:last-child),
@@ -637,6 +648,9 @@
 ========================================================= */
 
 .stock-paginacion {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
     min-height: 42px;
     padding: 6px 8px;
 
@@ -1144,4 +1158,34 @@
     background-color: #0b5ed7 !important;
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.18);
     transform: scale(1.05);
+}
+
+/* =========================================
+   STOCK - BOTONES DE ACCIONES
+========================================= */
+
+.stock-acciones {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    width: 150px;
+    margin: 0 auto;
+}
+
+.stock-btn-liberar {
+    width: 100%;
+}
+
+.stock-acciones-inferiores {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.stock-acciones-inferiores .btn {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
 }

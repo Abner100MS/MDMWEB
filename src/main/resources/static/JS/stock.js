@@ -712,22 +712,12 @@ function renderizarStock(lista) {
 
                 <td class="text-center">
 
-                    <div class="d-flex justify-content-center gap-1">
+                    <div class="stock-acciones">
 
+                        <!-- ARRIBA: LIBERAR -->
                         <button
                             type="button"
-                            class="btn btn-sm btn-outline-primary"
-                            onclick="editarStock('${item.activo}')"
-                            title="Editar información de Stock">
-
-                            <i class="bi bi-pencil-square"></i>
-                            Editar
-
-                        </button>
-
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-success"
+                            class="btn btn-sm btn-outline-success stock-btn-liberar"
                             onclick="liberarStock('${item.activo}')"
                             title="Liberar de Stock">
 
@@ -736,16 +726,32 @@ function renderizarStock(lista) {
 
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-danger"
-                            onclick="eliminarStock('${item.activo}')"
-                            title="Eliminar dispositivo">
+                        <!-- ABAJO: EDITAR Y ELIMINAR -->
+                        <div class="stock-acciones-inferiores">
 
-                            <i class="bi bi-trash"></i>
-                            Eliminar
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                onclick="editarStock('${item.activo}')"
+                                title="Editar información de Stock">
 
-                        </button>
+                                <i class="bi bi-pencil-square"></i>
+                                Editar
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="eliminarStock('${item.activo}')"
+                                title="Eliminar dispositivo">
+
+                                <i class="bi bi-trash"></i>
+                                Eliminar
+
+                            </button>
+
+                        </div>
 
                     </div>
 
