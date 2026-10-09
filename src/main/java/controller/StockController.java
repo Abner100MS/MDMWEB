@@ -258,6 +258,7 @@ public class StockController {
                                                 "message", "Equipo liberado de Stock correctamente",
                                                 "activo", activo));
         }
+
         // =====================================================
         // HISTORIAL DE UN ACTIVO
         // =====================================================
@@ -334,11 +335,11 @@ public class StockController {
                                                         "success", false,
                                                         "message", "La condición es obligatoria"));
                 }
-
                 condicion = condicion.trim().toUpperCase();
 
                 if (!condicion.equals("BUENO")
-                                && !condicion.equals("CON FALLA")) {
+                                && !condicion.equals("CON FALLA")
+                                && !condicion.equals("BATERÍA INFLADA")) {
 
                         return ResponseEntity.badRequest().body(
                                         Map.of(
@@ -590,5 +591,26 @@ public class StockController {
                                         .internalServerError()
                                         .build();
                 }
+        }
+
+        // =====================================================
+        // CONSULTAR ESTADO DE BATERÍA PARA ENVÍO A STOCK
+        // =====================================================
+
+        @GetMapping("/bateria/{activo}")
+        public ResponseEntity<?> consultarBateriaStock(
+                        @PathVariable String activo) {
+
+                return tabletRepository.findByActivo(activo)
+                                .map(tablet -> ResponseEntity.ok(
+                                                Map.of(
+                                                                "activo", activo,
+                                                                "estadoBateria",
+                                                                tablet.getEstadoBateria() != null
+                                                                                ? tablet.getEstadoBateria()
+                                                                                : "NORMAL")))
+                                .orElseGet(() -> ResponseEntity.status(404).body(
+                                                Map.of(
+                                                                "message", "Dispositivo no encontrado")));
         }
 }

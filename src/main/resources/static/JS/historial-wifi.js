@@ -259,7 +259,7 @@ function renderizarTablaWifi(registros, consultaIndividual) {
             formatearDuracionWifi(registro.duracionSegundos),
             motivo,
             consultaIndividual
-                ? wifiTotalElementos
+                ? "-"
                 : (registro.totalRegistros ?? 0)
         ];
 

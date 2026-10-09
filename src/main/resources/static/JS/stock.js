@@ -114,8 +114,7 @@ async function abrirModalEnviarStock(activo) {
             contenedor.innerHTML =
                 await response.text();
 
-            contenedor.dataset.cargado =
-                "true";
+            contenedor.dataset.cargado = "true";
 
             // Inicializar Stock
             if (typeof iniciarStock === "function") {
@@ -132,13 +131,10 @@ async function abrirModalEnviarStock(activo) {
             return;
         }
 
-
-        // Ahora el modal ya debe existir
         modalElemento =
             document.getElementById(
                 "modalEnviarStockDispositivo"
             );
-
     }
 
 
@@ -155,24 +151,16 @@ async function abrirModalEnviarStock(activo) {
     // =====================================================
 
     const inputActivo =
-        document.getElementById(
-            "dispositivoStockActivo"
-        );
+        document.getElementById("dispositivoStockActivo");
 
     const condicion =
-        document.getElementById(
-            "dispositivoStockCondicion"
-        );
+        document.getElementById("dispositivoStockCondicion");
 
     const motivo =
-        document.getElementById(
-            "dispositivoStockMotivo"
-        );
+        document.getElementById("dispositivoStockMotivo");
 
     const mensaje =
-        document.getElementById(
-            "mensajeEnviarStockDispositivo"
-        );
+        document.getElementById("mensajeEnviarStockDispositivo");
 
 
     inputActivo.value = activo;
@@ -186,12 +174,55 @@ async function abrirModalEnviarStock(activo) {
 
 
     // =====================================================
+    // CONSULTAR ESTADO DE BATERÍA DEL DISPOSITIVO
+    // =====================================================
+
+    try {
+
+        const response = await fetch(
+            `/api/stock/bateria/${encodeURIComponent(activo)}`
+        );
+
+        if (response.ok) {
+
+            const datos = await response.json();
+
+            // Solo necesitamos saber si está inflada.
+            // No utilizamos el porcentaje.
+
+            if (datos.estadoBateria === "INFLADA") {
+
+                condicion.value = "BATERÍA INFLADA";
+
+                motivo.value =
+                    "Retirado de producción por batería inflada";
+
+            }
+
+        } else {
+
+            console.warn(
+                "No se pudo consultar el estado de batería:",
+                activo,
+                response.status
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error consultando batería del dispositivo:",
+            error
+        );
+    }
+
+
+    // =====================================================
     // ABRIR MODAL
     // =====================================================
 
     document.body.appendChild(modalElemento);
 
-    // Abrir modal
     const modal =
         bootstrap.Modal.getOrCreateInstance(
             modalElemento
@@ -2041,5 +2072,36 @@ function generarReporteExcelStock() {
     if (modal) {
 
         modal.hide();
+    }
+}
+
+
+// =====================================================
+// COMPLETAR MOTIVO AL SELECCIONAR BATERÍA INFLADA
+// =====================================================
+
+function completarMotivoBateriaStock(select, idMotivo) {
+
+    const campoMotivo =
+        document.getElementById(idMotivo);
+
+    if (!campoMotivo) {
+        return;
+    }
+
+    const motivoAutomatico =
+        "Retirado de producción por batería inflada";
+
+    if (select.value === "BATERÍA INFLADA") {
+
+        if (!campoMotivo.value.trim()) {
+            campoMotivo.value = motivoAutomatico;
+        }
+
+    } else {
+
+        if (campoMotivo.value.trim() === motivoAutomatico) {
+            campoMotivo.value = "";
+        }
     }
 }

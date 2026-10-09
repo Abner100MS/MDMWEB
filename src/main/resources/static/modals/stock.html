@@ -128,20 +128,15 @@
 
                     <option value="">Filtros</option>
 
-                    <option value="BUENO">
-                        Bueno
-                    </option>
+                    <option value="BUENO">Bueno</option>
 
-                    <option value="CON FALLA">
-                        Con falla
-                    </option>
+                    <option value="CON FALLA">Con falla</option>
 
-                    <option value="REPORTANDO">
-                        Reportando
-                    </option>
+                    <option value="BATERÍA INFLADA">Batería inflada</option>
+
+                    <option value="REPORTANDO">Reportando</option>
 
                 </select>
-
             </div>
 
 
@@ -498,6 +493,10 @@
                                     Con falla
                                 </option>
 
+                                <option value="BATERÍA INFLADA">
+                                    Batería inflada
+                                </option>
+
                             </select>
 
                         </div>
@@ -705,6 +704,10 @@
 
                         <option value="CON FALLA">
                             Con falla
+                        </option>
+
+                        <option value="BATERÍA INFLADA">
+                            Batería inflada
                         </option>
 
                     </select>
@@ -925,7 +928,8 @@
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select id="dispositivoStockCondicion" class="form-select">
+                        <select id="dispositivoStockCondicion" class="form-select"
+                            onchange="completarMotivoBateriaStock(this, 'dispositivoStockMotivo')">
 
                             <option value="BUENO">
                                 Bueno
@@ -933,6 +937,10 @@
 
                             <option value="CON FALLA">
                                 Con falla
+                            </option>
+
+                            <option value="BATERÍA INFLADA">
+                                Batería inflada
                             </option>
 
                         </select>
